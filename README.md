@@ -1,2 +1,3 @@
 # AlertGarden
-App to stay Alert on the hydro score of your garden !
+"L'eau c'est la vie"
+Et ce n'est pas ton jardin qui te dira le contraire !
