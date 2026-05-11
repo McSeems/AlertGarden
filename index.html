@@ -3,39 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>AlertGarden</title>
-<meta name="description" content="Votre jardin, toujours au bon niveau.">
+<title>GardenMinder — Votre jardin, jamais oublié</title>
+<meta name="description" content="GardenMinder — Alertes d'arrosage, journal de bord et mémoire de votre jardin.">
 <meta name="theme-color" content="#1a3a2a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AlertGarden">
+<meta name="apple-mobile-web-app-title" content="GardenMinder">
 <script>
 const MANIFEST = {
-  name:"AlertGarden",short_name:"AlertGarden",description:"Votre jardin, toujours au bon niveau.",
+  name:"GardenMinder",short_name:"GardenMinder",description:"Votre jardin, jamais oublié.",
   start_url:"./",display:"standalone",background_color:"#1a3a2a",theme_color:"#1a3a2a",orientation:"portrait",
-  icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231a3a2a'/><text y='.85em' font-size='380' x='66'>💧</text></svg>",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]
+  icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231a3a2a'/><text y='.85em' font-size='380' x='66'>🌱</text></svg>",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]
 };
 const blob=new Blob([JSON.stringify(MANIFEST)],{type:'application/json'});
 const manifestURL=URL.createObjectURL(blob);
 const linkEl=document.createElement('link');linkEl.rel='manifest';linkEl.href=manifestURL;
 document.currentScript.parentNode.insertBefore(linkEl,document.currentScript);
-const CACHE_VERSION='alertgarden-v4';
+const CACHE_VERSION='gardenminder-v1';
 const SW_CODE=`const CACHE_NAME='${CACHE_VERSION}';const URLS_TO_CACHE=[location.pathname];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(URLS_TO_CACHE)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(cached=>{const nf=fetch(e.request).then(r=>{if(r&&r.status===200&&r.type==='basic'){const c=r.clone();caches.open(CACHE_NAME).then(ca=>ca.put(e.request,c));}return r;}).catch(()=>cached);return cached||nf;}));});`;
 if('serviceWorker' in navigator){const swBlob=new Blob([SW_CODE],{type:'application/javascript'});const swURL=URL.createObjectURL(swBlob);window.addEventListener('load',()=>{navigator.serviceWorker.register(swURL,{scope:'./'}).catch(e=>console.warn('[PWA]',e));});}
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --green-deep:#1a3a2a;--green-mid:#2d5c3f;--green-light:#4a8c5c;--green-pale:#a8d5b5;--green-mist:#e8f5ec;
   --earth:#8b6b4a;--earth-light:#c4a882;--sun:#f0c040;--water:#4a9eca;--water-light:#a8d4ea;
-  --danger:#e05252;--warn:#e09040;--ok:#4aad6a;--cream:#faf8f4;
+  --danger:#e05252;--warn:#e09040;--ok:#4aad6a;--cream:#faf8f4;--paper:#f5f0e8;
   --text-dark:#1a2a1f;--text-mid:#4a6050;--text-light:#8aaa94;
   --premium:#7c4dff;--premium-light:#ede7ff;--premium-pale:#f3f0ff;
+  --gold:#d4a017;--gold-light:#f0c840;
   --shadow:0 4px 24px rgba(26,58,42,0.10);--radius:18px;--radius-sm:10px;
+  --ff-display:'Playfair Display',Georgia,serif;
+  --ff-serif:'Fraunces',Georgia,serif;
+  --ff-body:'Outfit',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden;}
+body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden;}
 
 .screen{display:none;min-height:100vh;flex-direction:column;}
 .screen.active{display:flex;}
@@ -51,7 +55,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .landing-logo{display:flex;align-items:center;gap:12px;margin-bottom:60px;}
 .logo-icon{width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);}
 .logo-text{font-family:'Fraunces',serif;color:white;font-size:22px;font-weight:600;letter-spacing:-0.3px;}
-.landing-tagline{font-family:'Fraunces',serif;font-size:2.6rem;font-weight:300;color:white;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
+.landing-tagline{font-family:var(--ff-display);font-size:2.6rem;font-weight:400;color:white;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
 .landing-tagline em{font-style:italic;color:var(--green-pale);}
 .landing-sub{color:rgba(255,255,255,0.65);font-size:1rem;line-height:1.6;max-width:320px;}
 .landing-features{padding:0 32px;position:relative;z-index:1;}
@@ -59,7 +63,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .feature-pill-icon{font-size:18px;}
 .feature-pill-text{color:rgba(255,255,255,0.85);font-size:0.88rem;}
 .landing-bottom{padding:24px 32px 48px;position:relative;z-index:1;}
-.btn-start{width:100%;padding:18px;border-radius:16px;border:none;cursor:pointer;background:white;color:var(--green-deep);font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;letter-spacing:0.2px;transition:all 0.2s;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+.btn-start{width:100%;padding:18px;border-radius:16px;border:none;cursor:pointer;background:white;color:var(--green-deep);font-family:var(--ff-body);font-size:1rem;font-weight:600;letter-spacing:0.2px;transition:all 0.2s;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
 .btn-start:active{transform:scale(0.98);}
 .landing-legal{text-align:center;margin-top:14px;color:rgba(255,255,255,0.35);font-size:0.78rem;}
 
@@ -80,9 +84,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .intro-dot.active{background:var(--green-mid);width:24px;border-radius:4px;}
 
 /* ── BUTTONS ── */
-.btn-primary{width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;background:var(--green-mid);color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;transition:all 0.2s;}
+.btn-primary{width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;background:var(--green-mid);color:white;font-family:var(--ff-body);font-size:1rem;font-weight:600;transition:all 0.2s;}
 .btn-primary:active{transform:scale(0.98);background:var(--green-deep);}
-.btn-secondary{width:100%;padding:14px;border-radius:14px;border:2px solid var(--green-pale);cursor:pointer;background:transparent;color:var(--green-mid);font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;margin-top:10px;transition:all 0.2s;}
+.btn-secondary{width:100%;padding:14px;border-radius:14px;border:2px solid var(--green-pale);cursor:pointer;background:transparent;color:var(--green-mid);font-family:var(--ff-body);font-size:0.95rem;font-weight:500;margin-top:10px;transition:all 0.2s;}
 .btn-secondary:active{background:var(--green-mist);}
 
 /* ── WIZARD ── */
@@ -130,8 +134,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .reminder-opt.selected{border-color:var(--green-mid);background:var(--green-mist);}
 .reminder-opt-text{font-size:0.92rem;color:var(--text-dark);font-weight:500;}
 .wizard-footer{padding:16px 24px 32px;background:white;border-top:1px solid rgba(0,0,0,0.06);display:flex;gap:12px;}
-.btn-back{padding:14px 20px;border-radius:12px;border:2px solid var(--green-pale);background:transparent;color:var(--green-mid);font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.btn-next{flex:1;padding:14px;border-radius:12px;border:none;background:var(--green-mid);color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-back{padding:14px 20px;border-radius:12px;border:2px solid var(--green-pale);background:transparent;color:var(--green-mid);font-family:var(--ff-body);font-size:0.95rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-next{flex:1;padding:14px;border-radius:12px;border:none;background:var(--green-mid);color:white;font-family:var(--ff-body);font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .btn-next:active{background:var(--green-deep);}
 .info-box{background:var(--green-mist);border-radius:10px;padding:14px;font-size:0.85rem;color:var(--text-mid);line-height:1.55;margin-bottom:16px;}
 
@@ -361,16 +365,253 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .calib-body { font-size: 0.82rem; color: var(--text-mid); line-height: 1.6; }
 
 /* ── BOTTOM NAV ── */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);display:flex;padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px);z-index:100;box-shadow:0 -2px 16px rgba(26,58,42,0.07);gap:4px;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 4px;border-radius:14px;transition:background 0.15s,transform 0.15s;-webkit-tap-highlight-color:transparent;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);display:flex;padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 6px);z-index:100;box-shadow:0 -2px 16px rgba(26,58,42,0.07);gap:2px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 2px;border-radius:14px;transition:background 0.15s,transform 0.15s;-webkit-tap-highlight-color:transparent;position:relative;}
 .nav-item:active{transform:scale(0.88);}
 .nav-item.active{background:rgba(74,140,90,0.12);}
-.nav-icon-wrap{width:40px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.nav-icon-wrap{width:36px;height:26px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.2s cubic-bezier(0.34,1.56,0.64,1);}
 .nav-item.active .nav-icon-wrap{background:var(--green-mid);transform:translateY(-3px);}
-.nav-icon{font-size:18px;}
-.nav-label{font-size:0.63rem;font-weight:600;color:var(--text-light);letter-spacing:0.2px;transition:color 0.15s;}
+.nav-icon{font-size:17px;}
+.nav-label{font-size:0.58rem;font-weight:600;color:var(--text-light);letter-spacing:0.2px;transition:color 0.15s;}
 .nav-item.active .nav-label{color:var(--green-mid);}
 .nav-dot{display:none;}
+.nav-badge{position:absolute;top:2px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--danger);color:white;font-size:0.5rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+/* ══════════════════════════════════════
+   JOURNAL DE BORD
+══════════════════════════════════════ */
+.journal-header{padding:52px 20px 12px;background:white;border-bottom:1px solid rgba(0,0,0,0.06);}
+.journal-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.journal-title{font-family:var(--ff-display);font-size:1.6rem;font-weight:400;color:var(--text-dark);letter-spacing:-0.5px;}
+.journal-title em{font-style:italic;color:var(--green-mid);}
+.btn-new-entry{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;background:var(--green-mid);border:none;color:white;font-family:var(--ff-body);font-size:0.82rem;font-weight:600;cursor:pointer;}
+.journal-seg{display:flex;background:var(--green-mist);border-radius:10px;padding:3px;}
+.journal-seg-btn{flex:1;padding:7px 0;border-radius:8px;border:none;font-family:var(--ff-body);font-size:0.78rem;font-weight:500;cursor:pointer;color:var(--text-light);background:transparent;transition:all 0.2s;}
+.journal-seg-btn.active{background:white;color:var(--green-deep);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+
+.journal-summary{margin:14px 16px;background:linear-gradient(135deg,var(--green-deep),var(--green-mid));border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;}
+.journal-summary::after{content:'📖';position:absolute;right:16px;bottom:-4px;font-size:4rem;opacity:0.1;pointer-events:none;}
+.journal-sum-label{font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:10px;}
+.journal-sum-row{display:flex;gap:0;}
+.journal-sum-stat{flex:1;text-align:center;}
+.journal-sum-stat+.journal-sum-stat{border-left:1px solid rgba(255,255,255,0.1);}
+.journal-sum-val{font-family:var(--ff-display);font-size:1.8rem;font-weight:600;color:white;line-height:1;}
+.journal-sum-sub{font-size:0.6rem;color:rgba(255,255,255,0.5);margin-top:3px;}
+
+.journal-month{font-size:0.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);padding:12px 16px 6px 52px;}
+.journal-entry{display:flex;gap:10px;padding:0 16px;margin-bottom:6px;}
+.journal-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:26px;}
+.journal-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;margin-top:12px;border:2px solid white;position:relative;z-index:1;}
+.journal-dot.action{background:#e8f5ec;color:var(--green-mid);}
+.journal-dot.note{background:#fef9e7;color:#b08020;}
+.journal-dot.problem{background:#fde8e8;color:#c04040;}
+.journal-dot.harvest{background:#e8f8e8;color:#2a7a2a;}
+.journal-dot.treatment{background:#e8f0fe;color:#5060c0;}
+.journal-dot.photo{background:#fff0e8;color:#c07030;}
+.journal-connector{width:2px;flex:1;background:rgba(168,213,181,0.25);margin-top:2px;min-height:10px;}
+
+.journal-card{flex:1;background:white;border-radius:14px;padding:13px;box-shadow:0 2px 10px rgba(26,58,42,0.06);border:1px solid rgba(26,58,42,0.05);margin-bottom:0;cursor:pointer;transition:transform 0.15s;}
+.journal-card:active{transform:scale(0.98);}
+.jcard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.jcard-plant{display:flex;align-items:center;gap:6px;}
+.jcard-plant-name{font-size:0.78rem;font-weight:600;color:var(--text-dark);}
+.jcard-time{font-size:0.65rem;color:var(--text-light);margin-top:1px;}
+.jcard-tag{font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;margin-left:6px;}
+.jcard-tag.action{background:#e8f5ec;color:var(--green-mid);}
+.jcard-tag.note{background:#fef9e7;color:#b08020;}
+.jcard-tag.problem{background:#fde8e8;color:#c04040;}
+.jcard-tag.harvest{background:#e8f8e8;color:#2a7a2a;}
+.jcard-tag.treatment{background:#e8f0fe;color:#5060c0;}
+.jcard-tag.photo{background:#fff0e8;color:#c07030;}
+.jcard-text{font-size:0.82rem;color:var(--text-mid);line-height:1.55;margin-bottom:8px;}
+.jcard-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.jcard-chip{display:inline-flex;align-items:center;gap:3px;background:var(--green-mist);border-radius:6px;padding:2px 7px;font-size:0.65rem;color:var(--green-mid);font-weight:500;}
+.jcard-shared{font-size:0.65rem;color:var(--text-light);margin-left:auto;display:flex;align-items:center;gap:3px;}
+
+/* FAB */
+.fab{position:fixed;bottom:84px;right:18px;width:52px;height:52px;border-radius:17px;background:var(--green-mid);border:none;cursor:pointer;box-shadow:0 6px 24px rgba(45,92,63,0.4);display:flex;align-items:center;justify-content:center;font-size:1.4rem;z-index:40;transition:transform 0.2s,box-shadow 0.2s;}
+.fab:active{transform:scale(0.92);}
+
+/* ── Entry sheet ── */
+.entry-sheet-overlay{position:fixed;inset:0;background:rgba(10,20,14,0.5);z-index:150;display:none;backdrop-filter:blur(4px);}
+.entry-sheet-overlay.open{display:block;}
+.entry-sheet{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:24px 24px 0 0;padding:12px 20px 40px;z-index:151;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);max-height:92vh;overflow-y:auto;}
+.entry-sheet.open{transform:translateY(0);}
+.entry-sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,0.12);margin:0 auto 16px;}
+.sheet-title{font-family:var(--ff-display);font-size:1.25rem;font-weight:400;color:var(--text-dark);margin-bottom:14px;}
+.sheet-title em{font-style:italic;color:var(--green-mid);}
+.sheet-section{font-size:0.72rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.type-btn{background:var(--cream);border:2px solid transparent;border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.15s;font-family:var(--ff-body);}
+.type-btn.selected{border-color:var(--green-mid);background:var(--green-mist);}
+.type-btn .type-icon{font-size:1.4rem;margin-bottom:3px;}
+.type-btn .type-label{font-size:0.65rem;font-weight:600;color:var(--text-mid);}
+.type-btn.selected .type-label{color:var(--green-mid);}
+.plant-picker-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+.plant-picker-scroll::-webkit-scrollbar{display:none;}
+.plant-chip-pick{display:flex;align-items:center;gap:5px;background:var(--cream);border:2px solid transparent;border-radius:10px;padding:7px 12px;cursor:pointer;flex-shrink:0;font-size:0.8rem;font-weight:500;color:var(--text-mid);transition:all 0.15s;font-family:var(--ff-body);}
+.plant-chip-pick.selected{background:var(--green-mist);border-color:var(--green-mid);color:var(--green-mid);}
+.entry-textarea{width:100%;padding:12px 14px;border:2px solid rgba(26,58,42,0.1);border-radius:12px;font-family:var(--ff-body);font-size:0.9rem;color:var(--text-dark);resize:none;outline:none;min-height:90px;background:var(--cream);line-height:1.55;margin-bottom:14px;transition:border-color 0.2s;}
+.entry-textarea:focus{border-color:var(--green-light);}
+.share-row{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:12px;padding:11px 14px;margin-bottom:14px;}
+.share-row-info strong{display:block;font-size:0.8rem;color:var(--text-dark);margin-bottom:1px;}
+.share-row-info span{font-size:0.72rem;color:var(--text-light);}
+.toggle-sw{width:42px;height:24px;border-radius:12px;background:var(--green-mid);position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
+.toggle-sw.off{background:rgba(26,58,42,0.15);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:white;position:absolute;top:3px;right:3px;transition:transform 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.toggle-sw.off .toggle-knob{transform:translateX(-18px);}
+.btn-submit-entry{width:100%;padding:15px;border-radius:14px;background:var(--green-mid);border:none;color:white;font-family:var(--ff-body);font-size:0.95rem;font-weight:600;cursor:pointer;}
+
+/* ══════════════════════════════════════
+   COMMUNAUTÉ
+══════════════════════════════════════ */
+.com-header{padding:52px 20px 12px;background:white;border-bottom:1px solid rgba(0,0,0,0.06);}
+.com-title{font-family:var(--ff-display);font-size:1.6rem;font-weight:400;color:var(--text-dark);letter-spacing:-0.5px;}
+.com-title em{font-style:italic;color:var(--green-mid);}
+.com-actions{display:flex;gap:8px;margin-top:2px;}
+.com-action-btn{width:36px;height:36px;border-radius:11px;background:var(--green-mist);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+
+.stories-row{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 10px;border-bottom:1px solid rgba(0,0,0,0.05);}
+.stories-row::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;}
+.story-add{width:54px;height:54px;border-radius:50%;background:var(--green-mist);border:2px dashed var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.story-ring{width:58px;height:58px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,var(--green-mid),var(--green-pale));}
+.story-ring.new{background:linear-gradient(135deg,var(--green-mid),#7ecf96);box-shadow:0 0 0 2px white,0 0 0 3.5px var(--green-mid);}
+.story-ring.seen{background:rgba(26,58,42,0.12);}
+.story-av{width:100%;height:100%;border-radius:50%;background:var(--green-mist);display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:2.5px solid white;}
+.story-name{font-size:0.6rem;color:var(--text-mid);font-weight:500;max-width:58px;text-align:center;line-height:1.3;}
+
+.com-tabs-row{display:flex;padding:0 16px;border-bottom:1px solid rgba(0,0,0,0.06);}
+.com-tab{padding:10px 14px 11px;border:none;background:transparent;font-family:var(--ff-body);font-size:0.83rem;font-weight:500;color:var(--text-light);cursor:pointer;position:relative;transition:color 0.2s;}
+.com-tab.active{color:var(--green-mid);font-weight:600;}
+.com-tab.active::after{content:'';position:absolute;bottom:-1px;left:10px;right:10px;height:2px;background:var(--green-mid);border-radius:2px;}
+.com-notif-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--warn);margin-left:3px;margin-bottom:2px;vertical-align:middle;}
+
+/* Carte voisins */
+.neighbors-map{margin:14px 16px;background:linear-gradient(160deg,var(--green-deep),var(--green-mid));border-radius:var(--radius);overflow:hidden;position:relative;height:110px;cursor:pointer;}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(168,213,181,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(168,213,181,0.06) 1px,transparent 1px);background-size:28px 28px;}
+.map-pin-you{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--green-pale);border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:2;}
+.map-pin-nb{position:absolute;width:26px;height:26px;border-radius:50%;background:white;border:2px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:0.85rem;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+.map-bottom{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(to top,rgba(10,20,14,0.7) 0%,transparent 100%);}
+.map-cta-text{font-size:0.82rem;font-weight:600;color:white;}
+.map-sub-text{font-size:0.65rem;color:rgba(255,255,255,0.6);}
+
+/* Défi */
+.challenge-strip{margin:0 16px 12px;background:linear-gradient(135deg,#fef9e7,#fde9a0);border-radius:var(--radius);padding:14px;border:1px solid rgba(212,160,23,0.2);display:flex;align-items:center;gap:12px;}
+.challenge-icon{font-size:2rem;flex-shrink:0;}
+.challenge-body{flex:1;}
+.challenge-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b08020;margin-bottom:3px;}
+.challenge-title{font-family:var(--ff-display);font-size:0.95rem;font-weight:600;color:var(--text-dark);line-height:1.25;margin-bottom:4px;}
+.challenge-bar-wrap{height:4px;background:rgba(212,160,23,0.2);border-radius:2px;overflow:hidden;margin-bottom:2px;}
+.challenge-bar-fill{height:100%;background:var(--gold);border-radius:2px;width:62%;}
+.challenge-sub{font-size:0.65rem;color:#8a6020;}
+.btn-challenge{padding:7px 13px;border-radius:9px;background:var(--gold);border:none;color:white;font-family:var(--ff-body);font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0;}
+
+/* Post communautaire */
+.com-post{margin:0 16px 10px;background:white;border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 12px rgba(26,58,42,0.06);border:1px solid rgba(26,58,42,0.05);}
+.post-head{display:flex;align-items:center;gap:10px;padding:13px 13px 9px;}
+.post-av-ring{width:40px;height:40px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--green-mid),var(--green-pale));flex-shrink:0;}
+.post-av{width:100%;height:100%;border-radius:50%;background:var(--green-mist);display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:2px solid white;}
+.post-name{font-size:0.83rem;font-weight:600;color:var(--text-dark);}
+.post-loc{font-size:0.67rem;color:var(--text-light);margin-top:1px;}
+.post-time-txt{font-size:0.65rem;color:var(--text-light);margin-left:auto;flex-shrink:0;}
+.post-body{padding:0 13px 10px;}
+.post-plant-tag{display:inline-flex;align-items:center;gap:4px;background:var(--green-mist);border-radius:7px;padding:3px 9px;font-size:0.72rem;font-weight:500;color:var(--green-mid);margin-bottom:8px;}
+.post-text{font-size:0.83rem;color:var(--text-mid);line-height:1.6;margin-bottom:8px;}
+.post-img{width:100%;height:150px;background:linear-gradient(135deg,#c8e6c9,#90c870);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;}
+.post-ba{display:grid;grid-template-columns:1fr 1fr;gap:2px;height:130px;}
+.post-ba-panel{display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative;}
+.post-ba-label{position:absolute;top:6px;left:7px;font-size:0.55rem;font-weight:700;text-transform:uppercase;color:white;background:rgba(0,0,0,0.3);border-radius:4px;padding:2px 5px;}
+.post-footer{padding:9px 13px;border-top:1px solid rgba(26,58,42,0.05);display:flex;align-items:center;gap:0;}
+.post-action{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:0.76rem;color:var(--text-light);font-weight:500;border:none;background:transparent;font-family:var(--ff-body);transition:background 0.15s;}
+.post-action:active{background:var(--green-mist);}
+.post-action.liked{color:var(--danger);}
+.post-sep-v{width:1px;height:16px;background:rgba(26,58,42,0.08);margin:0 3px;}
+.post-share{margin-left:auto;font-size:0.76rem;color:var(--text-light);cursor:pointer;padding:5px 8px;border-radius:8px;}
+
+/* Échanges surplus */
+.swap-section{padding:0 16px;margin-bottom:14px;}
+.swap-section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-top:4px;}
+.swap-section-title h3{font-family:var(--ff-display);font-size:1rem;color:var(--text-dark);}
+.swap-section-title a{font-size:0.78rem;color:var(--green-mid);font-weight:500;cursor:pointer;}
+.swap-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+.swap-scroll::-webkit-scrollbar{display:none;}
+.swap-card{flex-shrink:0;width:105px;background:white;border-radius:14px;padding:12px 10px;text-align:center;box-shadow:0 2px 10px rgba(26,58,42,0.06);border:1px solid rgba(26,58,42,0.05);cursor:pointer;}
+.swap-emoji{font-size:1.8rem;margin-bottom:5px;}
+.swap-name{font-size:0.72rem;font-weight:600;color:var(--text-dark);margin-bottom:2px;}
+.swap-who{font-size:0.62rem;color:var(--text-light);margin-bottom:7px;}
+.swap-dist{display:inline-block;font-size:0.6rem;font-weight:600;color:var(--green-mid);background:var(--green-mist);border-radius:5px;padding:2px 7px;}
+
+/* ══════════════════════════════════════
+   MÉMOIRE VIVANTE
+══════════════════════════════════════ */
+.memory-header{padding:52px 20px 12px;background:white;border-bottom:1px solid rgba(0,0,0,0.06);}
+.memory-title-h{font-family:var(--ff-display);font-size:1.6rem;font-weight:400;color:var(--text-dark);letter-spacing:-0.5px;}
+.memory-title-h em{font-style:italic;color:var(--earth);}
+
+/* Niveau jardin */
+.garden-level-card{margin:14px 16px;background:linear-gradient(135deg,var(--green-deep),var(--green-mid));border-radius:var(--radius);padding:18px;display:flex;align-items:center;gap:18px;}
+.level-orb{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--green-light),var(--green-pale));display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(74,140,92,0.4);flex-shrink:0;}
+.level-num{font-family:var(--ff-display);font-size:2rem;font-weight:700;color:white;line-height:1;}
+.level-word{font-size:0.5rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.65);margin-top:1px;}
+.level-info{flex:1;}
+.level-name{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:white;margin-bottom:3px;}
+.level-sub{font-size:0.72rem;color:rgba(255,255,255,0.55);margin-bottom:10px;}
+.level-bar-wrap{height:5px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.level-bar-fill{height:100%;background:linear-gradient(90deg,var(--green-pale),white);border-radius:3px;}
+.level-bar-text{font-size:0.6rem;color:rgba(255,255,255,0.4);}
+
+/* Série hebdo */
+.streak-card{margin:0 16px 12px;background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.streak-card-title{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:var(--text-dark);margin-bottom:3px;}
+.streak-card-sub{font-size:0.76rem;color:var(--text-light);margin-bottom:14px;}
+.streak-weeks-row{display:flex;gap:5px;margin-bottom:12px;}
+.week-dot{flex:1;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:700;color:rgba(26,58,42,0.3);}
+.week-dot.done{background:var(--green-light);color:white;}
+.week-dot.current{background:var(--green-mist);color:var(--green-mid);border:2px solid var(--green-light);}
+.week-dot.empty{background:rgba(26,58,42,0.05);}
+.streak-flame{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#fef9e7,#fde9a0);border-radius:12px;padding:11px 14px;}
+.streak-flame-num{font-family:var(--ff-display);font-size:1.8rem;font-weight:700;color:var(--text-dark);}
+.streak-flame-info strong{display:block;font-size:0.8rem;color:var(--text-dark);}
+.streak-flame-info span{font-size:0.72rem;color:#8a6020;}
+
+/* Badges */
+.badges-section{margin:0 16px 12px;}
+.badges-title{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:var(--text-dark);margin-bottom:12px;}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.badge-item{text-align:center;padding:13px 6px;border-radius:13px;cursor:pointer;transition:all 0.2s;}
+.badge-item.earned{background:white;box-shadow:0 2px 10px rgba(26,58,42,0.06);border:1px solid rgba(26,58,42,0.05);}
+.badge-item.locked{background:rgba(26,58,42,0.03);opacity:0.45;}
+.badge-item.rare{background:linear-gradient(135deg,#fef9e7,#fde9a0);border:1px solid rgba(212,160,23,0.2);}
+.badge-emoji{font-size:1.7rem;display:block;margin-bottom:5px;}
+.badge-name{font-size:0.6rem;font-weight:600;color:var(--text-dark);line-height:1.3;}
+.badge-date{font-size:0.52rem;color:var(--text-light);margin-top:2px;}
+
+/* Saisons */
+.seasons-section{margin:0 16px 12px;}
+.seasons-title{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:var(--text-dark);margin-bottom:12px;}
+.seasons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.season-card{border-radius:16px;overflow:hidden;aspect-ratio:3/4;position:relative;cursor:pointer;transition:transform 0.2s;}
+.season-card:active{transform:scale(0.97);}
+.season-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.season-bg.spring{background:linear-gradient(160deg,#c8e8c8,#90d090);}
+.season-bg.summer{background:linear-gradient(160deg,#f0d878,#e0a830);}
+.season-bg.autumn{background:linear-gradient(160deg,#e8a060,#c06820);}
+.season-bg.winter{background:linear-gradient(160deg,#c0d8e8,#80a8c8);}
+.season-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,31,20,0.75) 0%,transparent 55%);display:flex;flex-direction:column;justify-content:flex-end;padding:12px;}
+.season-name{font-family:var(--ff-display);font-style:italic;font-size:1rem;color:white;margin-bottom:2px;}
+.season-stat{font-size:0.6rem;color:rgba(255,255,255,0.65);}
+.season-badge-chip{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border-radius:7px;padding:2px 7px;font-size:0.58rem;font-weight:700;color:var(--text-dark);}
+
+/* Timelapse */
+.timelapse-card{margin:0 16px 14px;background:linear-gradient(135deg,var(--earth),var(--earth-light));border-radius:var(--radius);padding:18px;display:flex;gap:14px;align-items:center;}
+.timelapse-icon{font-size:2.4rem;flex-shrink:0;}
+.timelapse-body{flex:1;}
+.timelapse-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:4px;}
+.timelapse-title{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:white;line-height:1.25;margin-bottom:3px;}
+.timelapse-sub{font-size:0.72rem;color:rgba(255,255,255,0.65);}
+.btn-timelapse{padding:8px 14px;border-radius:10px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;font-family:var(--ff-body);font-size:0.72rem;font-weight:600;cursor:pointer;flex-shrink:0;}
 
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px);}
@@ -473,8 +714,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 <div id="screen-auth" class="screen">
   <div class="auth-container">
     <div class="auth-logo">
-      <div class="auth-logo-icon">💧</div>
-      <div class="auth-logo-text">AlertGarden</div>
+      <div class="auth-logo-icon">🌱</div>
+      <div class="auth-logo-text">GardenMinder</div>
     </div>
 
     <!-- LOGIN / SIGNUP tabs -->
@@ -483,9 +724,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
       <div id="tab-signup" style="flex:1;padding:9px;text-align:center;font-size:0.88rem;font-weight:500;cursor:pointer;border-radius:8px;color:var(--text-mid);" onclick="setAuthMode('signup')">Créer un compte</div>
     </div>
 
-    <div id="auth-title-login" class="auth-title">Content de vous revoir 🌿</div>
-    <div id="auth-title-signup" class="auth-title" style="display:none;">Rejoignez AlertGarden</div>
-    <div class="auth-sub">Sauvegardez votre jardin et accédez-y depuis n'importe quel appareil.</div>
+    <div id="auth-title-login" class="auth-title">Content de vous revoir 🌱</div>
+    <div id="auth-title-signup" class="auth-title" style="display:none;">Rejoignez GardenMinder</div>
+    <div class="auth-sub">Votre jardin mérite une mémoire. Créez votre compte pour ne plus rien oublier.</div>
 
     <!-- Social buttons -->
     <button class="auth-social-btn auth-google" onclick="authWithGoogle()">
@@ -532,23 +773,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
   <div class="landing-leaves2">🍃</div>
   <div class="landing-top">
     <div class="landing-logo">
-      <div class="logo-icon">💧</div>
-      <div class="logo-text">AlertGarden</div>
+      <div class="logo-icon">🌱</div>
+      <div class="logo-text">GardenMinder</div>
     </div>
     <div class="landing-hero">
-      <div class="landing-tagline">Votre jardin,<br><em>toujours au bon<br>niveau.</em></div>
-      <div class="landing-sub">L'app qui calcule précisément quand arroser, selon la météo réelle de votre jardin.</div>
+      <div class="landing-tagline">Votre jardin,<br><em>jamais</em><br>oublié.</div>
+      <div class="landing-sub">Alertes d'arrosage intelligentes, journal de bord vivant et mémoire de vos saisons — tout en un.</div>
     </div>
   </div>
   <div class="landing-features">
-    <div class="feature-pill"><span class="feature-pill-icon">🌡️</span><span class="feature-pill-text">Météo en temps réel — Open-Meteo</span></div>
-    <div class="feature-pill"><span class="feature-pill-icon">🍅</span><span class="feature-pill-text">Suivi par plante — tomates, rosiers, gazon…</span></div>
-    <div class="feature-pill"><span class="feature-pill-icon">💶</span><span class="feature-pill-text">Économies d'eau calculées à l'euro près</span></div>
-    <div class="feature-pill"><span class="feature-pill-icon">🔔</span><span class="feature-pill-text">Alertes intelligentes — pluie prévue, chaleurs</span></div>
+    <div class="feature-pill"><span class="feature-pill-icon">💧</span><span class="feature-pill-text">Hygro météo réelle — arrosez au bon moment</span></div>
+    <div class="feature-pill"><span class="feature-pill-icon">📖</span><span class="feature-pill-text">Journal de bord — récoltes, traitements, notes</span></div>
+    <div class="feature-pill"><span class="feature-pill-icon">📸</span><span class="feature-pill-text">Timelapse automatique — 4 saisons en images</span></div>
+    <div class="feature-pill"><span class="feature-pill-icon">🌍</span><span class="feature-pill-text">Communauté de jardiniers proches de chez vous</span></div>
   </div>
   <div class="landing-bottom">
     <button class="btn-start" onclick="goTo('auth')">Commencer gratuitement →</button>
-    <div class="landing-legal">Gratuit · Sans publicité · Premium disponible</div>
+    <div class="landing-legal">Gratuit · Sans publicité · Journal & communauté inclus</div>
   </div>
 </div>
 
@@ -697,7 +938,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 <!-- ══════════════════ SCREEN 4 : MAIN APP ══════════════════ -->
 <div id="screen-app" class="screen">
   <div class="app-header">
-    <div class="app-logo">AlertGarden</div>
+    <div class="app-logo" style="font-family:var(--ff-display);font-weight:600;">Garden<em style="font-style:italic;color:var(--green-light);">Minder</em></div>
     <div style="display:flex;align-items:center;gap:10px;">
       <div id="premium-header-badge" style="display:none;background:var(--premium-light);color:var(--premium);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">✨ Premium</div>
       <div class="app-city" id="header-city">📍 —</div>
@@ -781,9 +1022,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
         <div class="quick-btn-icon blue">💧</div>
         <div class="quick-btn-label">Enregistrer<br>un arrosage</div>
       </button>
+      <button class="quick-btn" onclick="switchTab('journal',document.getElementById('nav-journal'));openEntrySheet()">
+        <div class="quick-btn-icon green">📖</div>
+        <div class="quick-btn-label">Ajouter au<br>journal</div>
+      </button>
       <button class="quick-btn" onclick="openAutoSchedule()">
-        <div class="quick-btn-icon green">⏰</div>
-        <div class="quick-btn-label">Arrosages<br>automatiques</div>
+        <div class="quick-btn-icon" style="background:#fef9e7;">⏰</div>
+        <div class="quick-btn-label">Arrosages<br>auto</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('memory',document.getElementById('nav-memory'))">
+        <div class="quick-btn-icon" style="background:#fde9a0;">🏆</div>
+        <div class="quick-btn-label">Mémoire<br>& badges</div>
       </button>
     </div>
 
@@ -803,13 +1052,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
     <div style="height:16px;"></div>
   </div>
 
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('home',this)"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
-    <div class="nav-item" onclick="switchTab('history',this)"><div class="nav-icon-wrap"><div class="nav-icon">📊</div></div><div class="nav-label">Historique</div></div>
-    <div class="nav-item" onclick="switchTab('alerts',this)"><div class="nav-icon-wrap"><div class="nav-icon">🔔</div></div><div class="nav-label">Alertes</div></div>
-    <div class="nav-item" onclick="switchTab('settings',this)"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
+  <div class="bottom-nav" id="main-nav">
+    <div class="nav-item active" id="nav-home" onclick="switchTab('home',this)"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
+    <div class="nav-item" id="nav-journal" onclick="switchTab('journal',this)"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item" id="nav-community" onclick="switchTab('community',this)" style="position:relative;"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div><div class="nav-badge" id="com-badge">3</div></div>
+    <div class="nav-item" id="nav-memory" onclick="switchTab('memory',this)"><div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div><div class="nav-label">Mémoire</div></div>
+    <div class="nav-item" id="nav-settings" onclick="switchTab('settings',this)"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
   </div>
-</div>
 
 <!-- ══════════════════ SCREEN 5 : PLANT DETAIL ══════════════════ -->
 <div id="screen-plant" class="screen">
@@ -854,9 +1103,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
   </div>
   <div class="bottom-nav">
     <div class="nav-item active" onclick="goBack()"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
-    <div class="nav-item" onclick="switchTab('history',this);goBack()"><div class="nav-icon-wrap"><div class="nav-icon">📊</div></div><div class="nav-label">Historique</div></div>
-    <div class="nav-item" onclick="switchTab('alerts',this);goBack()"><div class="nav-icon-wrap"><div class="nav-icon">🔔</div></div><div class="nav-label">Alertes</div></div>
-    <div class="nav-item" onclick="switchTab('settings',this);goBack()"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
+    <div class="nav-item" onclick="goBack();switchTab('journal',document.getElementById('nav-journal'))"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item" onclick="goBack();switchTab('community',document.getElementById('nav-community'))"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div></div>
+    <div class="nav-item" onclick="goBack();switchTab('settings',document.getElementById('nav-settings'))"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
   </div>
 </div>
 
@@ -865,7 +1114,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
   <div class="trial-end-container">
     <div class="trial-end-icon">🌱</div>
     <div class="trial-end-title">Votre essai Premium est terminé</div>
-    <div class="trial-end-body">Merci d'avoir testé AlertGarden Premium pendant 30 jours. Vos données et votre historique sont conservés.</div>
+    <div class="trial-end-body">Merci d'avoir testé GardenMinder Premium pendant 30 jours. Votre journal, votre historique et votre mémoire sont conservés.</div>
     <div class="trial-end-stats">
       <div class="trial-stat"><div class="trial-stat-val" id="ts-liters">—L</div><div class="trial-stat-label">Litres arrosés</div></div>
       <div class="trial-stat"><div class="trial-stat-val" id="ts-alerts">—</div><div class="trial-stat-label">Alertes reçues</div></div>
@@ -876,6 +1125,243 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
     <button class="btn-start-trial" style="margin-bottom:16px;" onclick="goTo('app')">Continuer en gratuit</button>
     <div class="premium-legal">Achat unique · À vie · Aucun abonnement</div>
   </div>
+</div>
+
+<!-- ══════════════════ TAB : JOURNAL DE BORD ══════════════════ -->
+<div id="tab-journal" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+  <div class="journal-header">
+    <div class="journal-header-top">
+      <div class="journal-title">Mon <em>Journal</em></div>
+      <button class="btn-new-entry" onclick="openEntrySheet()">+ Entrée</button>
+    </div>
+    <div class="journal-seg">
+      <button class="journal-seg-btn active" onclick="setJournalSeg(this,'notes')">📖 Mes notes</button>
+      <button class="journal-seg-btn" onclick="setJournalSeg(this,'watering')">💧 Arrosages</button>
+      <button class="journal-seg-btn" onclick="setJournalSeg(this,'stats')">📊 Bilan</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:80px;" id="journal-content">
+    <div class="journal-summary">
+      <div class="journal-sum-label">Ce mois-ci</div>
+      <div class="journal-sum-row">
+        <div class="journal-sum-stat"><div class="journal-sum-val" id="jsv-entries">0</div><div class="journal-sum-sub">entrées</div></div>
+        <div class="journal-sum-stat"><div class="journal-sum-val" id="jsv-harvest">0</div><div class="journal-sum-sub">récoltes</div></div>
+        <div class="journal-sum-stat"><div class="journal-sum-val" id="jsv-problems">0</div><div class="journal-sum-sub">problèmes</div></div>
+        <div class="journal-sum-stat"><div class="journal-sum-val" id="jsv-shared">0</div><div class="journal-sum-sub">partagées</div></div>
+      </div>
+    </div>
+    <div id="journal-timeline"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="switchTab('home',document.getElementById('nav-home'))"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
+    <div class="nav-item active"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item" onclick="switchTab('community',document.getElementById('nav-community'))"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div></div>
+    <div class="nav-item" onclick="switchTab('memory',document.getElementById('nav-memory'))"><div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div><div class="nav-label">Mémoire</div></div>
+    <div class="nav-item" onclick="switchTab('settings',document.getElementById('nav-settings'))"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════ TAB : COMMUNAUTÉ ══════════════════ -->
+<div id="tab-community" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+  <div class="com-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="com-title">Commu<em>nauté</em></div>
+      <div class="com-actions">
+        <button class="com-action-btn">🔔</button>
+        <button class="com-action-btn">✉️</button>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:80px;">
+    <!-- Stories -->
+    <div class="stories-row">
+      <div class="story-item"><div class="story-add">＋</div><div class="story-name">Mon jardin</div></div>
+      <div class="story-item"><div class="story-ring new"><div class="story-av">🍅</div></div><div class="story-name">Pierre M.</div></div>
+      <div class="story-item"><div class="story-ring new"><div class="story-av">🌿</div></div><div class="story-name">Marie L.</div></div>
+      <div class="story-item"><div class="story-ring"><div class="story-av">🌻</div></div><div class="story-name">Jd Boutan</div></div>
+      <div class="story-item"><div class="story-ring seen"><div class="story-av">🥕</div></div><div class="story-name">Sophie T.</div></div>
+      <div class="story-item"><div class="story-ring seen"><div class="story-av">🌸</div></div><div class="story-name">Claude B.</div></div>
+    </div>
+    <!-- Carte voisins -->
+    <div class="neighbors-map">
+      <div class="map-grid"></div>
+      <div class="map-pin-you">🌱</div>
+      <div class="map-pin-nb" style="left:26%;top:30%;">🍅</div>
+      <div class="map-pin-nb" style="left:64%;top:22%;">🌻</div>
+      <div class="map-pin-nb" style="left:70%;top:56%;">🥕</div>
+      <div class="map-pin-nb" style="left:32%;top:65%;">🌸</div>
+      <div class="map-bottom">
+        <div class="map-cta-text">🗺 8 jardins dans un rayon de 2 km</div>
+        <div class="map-sub-text">Voir la carte complète →</div>
+      </div>
+    </div>
+    <!-- Défi du mois -->
+    <div class="challenge-strip">
+      <div class="challenge-icon">🏆</div>
+      <div class="challenge-body">
+        <div class="challenge-tag">⚡ Défi du mois</div>
+        <div class="challenge-title">Zéro plante perdue en mai</div>
+        <div class="challenge-bar-wrap"><div class="challenge-bar-fill"></div></div>
+        <div class="challenge-sub">62% de la communauté · 18 jours restants</div>
+      </div>
+      <button class="btn-challenge">Rejoindre</button>
+    </div>
+    <!-- Tabs -->
+    <div class="com-tabs-row">
+      <button class="com-tab active" onclick="setComTab(this)">Proches</button>
+      <button class="com-tab" onclick="setComTab(this)">Tendances</button>
+      <button class="com-tab" onclick="setComTab(this)">Questions<span class="com-notif-dot"></span></button>
+    </div>
+    <!-- Post 1 avant/après -->
+    <div class="com-post">
+      <div class="post-head">
+        <div class="post-av-ring"><div class="post-av">🍅</div></div>
+        <div><div class="post-name">Pierre M.</div><div class="post-loc">📍 À 420m · Jardin de la Butte</div></div>
+        <div class="post-time-txt">2h</div>
+      </div>
+      <div class="post-ba">
+        <div class="post-ba-panel" style="background:linear-gradient(160deg,#d4e8d4,#b0c8b0);"><div class="post-ba-label">Avant</div>🥀</div>
+        <div class="post-ba-panel" style="background:linear-gradient(160deg,#90d090,#60b060);"><div class="post-ba-label">3 semaines</div>🍅</div>
+      </div>
+      <div class="post-body" style="padding-top:10px;">
+        <div class="post-plant-tag">🍅 Tomates cerises — 'Supersweet 100'</div>
+        <div class="post-text">3 semaines de suivi GardenMinder et la différence est nette. L'arrosage régularisé a tout changé !</div>
+      </div>
+      <div class="post-footer">
+        <button class="post-action liked" onclick="toggleComLike(this)">❤️ 12</button>
+        <div class="post-sep-v"></div>
+        <button class="post-action">💬 3</button>
+        <div class="post-share">↗</div>
+      </div>
+    </div>
+    <!-- Post 2 question -->
+    <div class="com-post">
+      <div class="post-head">
+        <div class="post-av-ring" style="background:linear-gradient(135deg,var(--earth),var(--earth-light));"><div class="post-av">🌻</div></div>
+        <div><div class="post-name">Jardin Boutan</div><div class="post-loc">📍 À 1,2km · Potager collectif</div></div>
+        <div class="post-time-txt">5h</div>
+      </div>
+      <div class="post-img">🌻</div>
+      <div class="post-body" style="padding-top:10px;">
+        <div class="post-plant-tag">🌻 Tournesol — question</div>
+        <div class="post-text">Feuilles inférieures qui jaunissent — carence ou normal à ce stade ? Quelqu'un a déjà vu ça ? 🙏</div>
+      </div>
+      <div class="post-footer">
+        <button class="post-action">🤔 4</button>
+        <div class="post-sep-v"></div>
+        <button class="post-action" style="color:var(--green-mid);font-weight:600;">💬 Répondre</button>
+        <div class="post-share">↗</div>
+      </div>
+    </div>
+    <!-- Échanges surplus -->
+    <div class="swap-section">
+      <div class="swap-section-title"><h3>🌱 Échanges proches</h3><a>Voir tout</a></div>
+      <div class="swap-scroll">
+        <div class="swap-card"><div class="swap-emoji">🍅</div><div class="swap-name">Plants tomates</div><div class="swap-who">Sophie T.</div><div class="swap-dist">320m</div></div>
+        <div class="swap-card"><div class="swap-emoji">🌿</div><div class="swap-name">Boutures basilic</div><div class="swap-who">Pierre M.</div><div class="swap-dist">420m</div></div>
+        <div class="swap-card"><div class="swap-emoji">🥒</div><div class="swap-name">Surplus courgettes</div><div class="swap-who">Marie L.</div><div class="swap-dist">800m</div></div>
+        <div class="swap-card"><div class="swap-emoji">🌸</div><div class="swap-name">Bulbes dahlias</div><div class="swap-who">Claude B.</div><div class="swap-dist">1.1km</div></div>
+      </div>
+    </div>
+    <div style="height:16px;"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="switchTab('home',document.getElementById('nav-home'))"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
+    <div class="nav-item" onclick="switchTab('journal',document.getElementById('nav-journal'))"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item active"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div></div>
+    <div class="nav-item" onclick="switchTab('memory',document.getElementById('nav-memory'))"><div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div><div class="nav-label">Mémoire</div></div>
+    <div class="nav-item" onclick="switchTab('settings',document.getElementById('nav-settings'))"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════ TAB : MÉMOIRE VIVANTE ══════════════════ -->
+<div id="tab-memory" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+  <div class="memory-header">
+    <div class="memory-title-h">Mémoire <em>Vivante</em></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:80px;">
+    <!-- Niveau jardin -->
+    <div class="garden-level-card">
+      <div class="level-orb">
+        <div class="level-num" id="garden-level-num">1</div>
+        <div class="level-word">niveau</div>
+      </div>
+      <div class="level-info">
+        <div class="level-name" id="garden-level-name">Jardin Débutant</div>
+        <div class="level-sub" id="garden-level-sub">Continuez à jardiner pour progresser</div>
+        <div class="level-bar-wrap"><div class="level-bar-fill" id="garden-level-bar" style="width:20%;"></div></div>
+        <div class="level-bar-text" id="garden-level-pts">0 / 100 points</div>
+      </div>
+    </div>
+    <!-- Timelapse -->
+    <div class="timelapse-card">
+      <div class="timelapse-icon">🎬</div>
+      <div class="timelapse-body">
+        <div class="timelapse-tag">📸 Mémoire photo</div>
+        <div class="timelapse-title">Créez votre timelapse de saison</div>
+        <div class="timelapse-sub">Ajoutez des photos dans le Journal pour débloquer votre avant/après</div>
+      </div>
+      <button class="btn-timelapse">Voir →</button>
+    </div>
+    <!-- Série hebdo -->
+    <div class="streak-card">
+      <div class="streak-card-title">📅 Série hebdomadaire</div>
+      <div class="streak-card-sub">Pas quotidienne — respecte le rythme naturel du jardin</div>
+      <div class="streak-weeks-row" id="streak-weeks"></div>
+      <div class="streak-flame">
+        <div class="streak-flame-num" id="streak-num">🔥 0</div>
+        <div class="streak-flame-info"><strong>semaine(s) consécutive(s)</strong><span>Commencez à jardiner pour démarrer votre série !</span></div>
+      </div>
+    </div>
+    <!-- Badges -->
+    <div class="badges-section">
+      <div class="badges-title">🏆 Vos badges</div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+    <!-- 4 Saisons -->
+    <div class="seasons-section">
+      <div class="seasons-title">📆 Mémoire des saisons</div>
+      <div class="seasons-grid">
+        <div class="season-card"><div class="season-bg spring">🌸</div><div class="season-overlay"><div class="season-name">Printemps</div><div class="season-stat" id="season-spring">Aucune entrée</div></div><div class="season-badge-chip">Mars–Mai</div></div>
+        <div class="season-card"><div class="season-bg summer">☀️</div><div class="season-overlay"><div class="season-name">Été</div><div class="season-stat" id="season-summer">Aucune entrée</div></div><div class="season-badge-chip">Juin–Août</div></div>
+        <div class="season-card"><div class="season-bg autumn">🍂</div><div class="season-overlay"><div class="season-name">Automne</div><div class="season-stat" id="season-autumn">Aucune entrée</div></div><div class="season-badge-chip">Sept–Nov</div></div>
+        <div class="season-card" style="opacity:0.6;"><div class="season-bg winter">❄️</div><div class="season-overlay"><div class="season-name">Hiver</div><div class="season-stat" id="season-winter">Aucune entrée</div></div><div class="season-badge-chip">Déc–Fév</div></div>
+      </div>
+    </div>
+    <div style="height:16px;"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="switchTab('home',document.getElementById('nav-home'))"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
+    <div class="nav-item" onclick="switchTab('journal',document.getElementById('nav-journal'))"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item" onclick="switchTab('community',document.getElementById('nav-community'))"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div></div>
+    <div class="nav-item active"><div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div><div class="nav-label">Mémoire</div></div>
+    <div class="nav-item" onclick="switchTab('settings',document.getElementById('nav-settings'))"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════ ENTRY SHEET ══════════════════ -->
+<div class="entry-sheet-overlay" id="entry-overlay" onclick="closeEntrySheet()"></div>
+<div class="entry-sheet" id="entry-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Nouvelle <em>entrée</em></div>
+  <div class="sheet-section">Type</div>
+  <div class="type-grid" id="entry-type-grid">
+    <div class="type-btn selected" onclick="selectEntryType(this,'action')"><div class="type-icon">✅</div><div class="type-label">Action</div></div>
+    <div class="type-btn" onclick="selectEntryType(this,'note')"><div class="type-icon">📝</div><div class="type-label">Note</div></div>
+    <div class="type-btn" onclick="selectEntryType(this,'problem')"><div class="type-icon">⚠️</div><div class="type-label">Problème</div></div>
+    <div class="type-btn" onclick="selectEntryType(this,'harvest')"><div class="type-icon">🌾</div><div class="type-label">Récolte</div></div>
+    <div class="type-btn" onclick="selectEntryType(this,'treatment')"><div class="type-icon">💊</div><div class="type-label">Traitement</div></div>
+    <div class="type-btn" onclick="selectEntryType(this,'photo')"><div class="type-icon">📸</div><div class="type-label">Photo</div></div>
+  </div>
+  <div class="sheet-section">Plante concernée</div>
+  <div class="plant-picker-scroll" id="entry-plant-picker"></div>
+  <div class="sheet-section">Note</div>
+  <textarea class="entry-textarea" id="entry-text" placeholder="Décrivez ce que vous avez observé, fait ou souhaitez retenir…"></textarea>
+  <div class="share-row">
+    <div class="share-row-info"><strong>Partager avec la communauté</strong><span>Visible par les jardiniers proches</span></div>
+    <div class="toggle-sw" id="entry-share-toggle" onclick="toggleEntryShare()"><div class="toggle-knob"></div></div>
+  </div>
+  <button class="btn-submit-entry" onclick="submitJournalEntry()">Enregistrer dans le journal ✓</button>
 </div>
 
 <!-- ══════════════════ TAB : HISTORY ══════════════════ -->
@@ -1124,10 +1610,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
     <div style="height:16px;"></div>
   </div>
   <div class="bottom-nav">
-    <div class="nav-item" onclick="switchTab('home',this)"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
-    <div class="nav-item" onclick="switchTab('history',this)"><div class="nav-icon-wrap"><div class="nav-icon">📊</div></div><div class="nav-label">Historique</div></div>
-    <div class="nav-item" onclick="switchTab('alerts',this)"><div class="nav-icon-wrap"><div class="nav-icon">🔔</div></div><div class="nav-label">Alertes</div></div>
-    <div class="nav-item active"><div class="nav-icon">⚙️</div><div class="nav-dot"></div><div class="nav-label">Réglages</div></div>
+    <div class="nav-item" onclick="switchTab('home',document.getElementById('nav-home'))"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
+    <div class="nav-item" onclick="switchTab('journal',document.getElementById('nav-journal'))"><div class="nav-icon-wrap"><div class="nav-icon">📖</div></div><div class="nav-label">Journal</div></div>
+    <div class="nav-item" onclick="switchTab('community',document.getElementById('nav-community'))"><div class="nav-icon-wrap"><div class="nav-icon">🌍</div></div><div class="nav-label">Communauté</div></div>
+    <div class="nav-item" onclick="switchTab('memory',document.getElementById('nav-memory'))"><div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div><div class="nav-label">Mémoire</div></div>
+    <div class="nav-item active"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
   </div>
 </div>
 
@@ -2445,16 +2932,278 @@ function saveEdit(){
   showToast('✅ Sauvegardé !');
 }
 
-// ── PWA ───────────────────────────────────────────────────────────────────────
+// ── PWA ───────────────────────────────────────────────────────────────────
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;showInstallBanner('android');});
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 const isInStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
 if(isIOS&&!isInStandalone)setTimeout(()=>showInstallBanner('ios'),3000);
-window.addEventListener('appinstalled',()=>{hideInstallBanner();showToast('✅ AlertGarden installée !');});
+window.addEventListener('appinstalled',()=>{hideInstallBanner();showToast('✅ GardenMinder installée !');});
 function showInstallBanner(type){const b=document.getElementById('install-banner');if(!b)return;document.getElementById('install-btn-android').style.display=type==='android'?'flex':'none';document.getElementById('install-guide-ios').style.display=type==='ios'?'block':'none';b.style.display='flex';setTimeout(()=>b.classList.add('visible'),50);}
 function hideInstallBanner(){const b=document.getElementById('install-banner');if(!b)return;b.classList.remove('visible');setTimeout(()=>b.style.display='none',300);}
 function triggerInstall(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(r=>{if(r.outcome==='accepted')showToast('✅ Installation en cours…');deferredInstallPrompt=null;hideInstallBanner();});}
+
+// ── JOURNAL STATE ─────────────────────────────────────────────────────────────
+// Journal entries stored in state.journalEntries
+if(!state.journalEntries) state.journalEntries = [];
+if(!state.weeklyStreak) state.weeklyStreak = 0;
+if(!state.gardenPoints) state.gardenPoints = 0;
+if(!state.earnedBadges) state.earnedBadges = [];
+
+const ENTRY_TYPES = {
+  action:    { label:'Action',    icon:'✅', color:'#e8f5ec', text:'#2d5c3f' },
+  note:      { label:'Note',      icon:'📝', color:'#fef9e7', text:'#b08020' },
+  problem:   { label:'Problème',  icon:'⚠️', color:'#fde8e8', text:'#c04040' },
+  harvest:   { label:'Récolte',   icon:'🌾', color:'#e8f8e8', text:'#2a7a2a' },
+  treatment: { label:'Traitement',icon:'💊', color:'#e8f0fe', text:'#5060c0' },
+  photo:     { label:'Photo',     icon:'📸', color:'#fff0e8', text:'#c07030' },
+};
+
+const ALL_BADGES = [
+  { id:'first_seed',   emoji:'🌱', name:'Premier semis',       desc:'Première entrée journal',  cond: s=>s.journalEntries.length>=1 },
+  { id:'survivor',     emoji:'☀️', name:'Survivant canicule',  desc:'Rare — Canicule traversée',cond: s=>s.gardenPoints>=50, rare:true },
+  { id:'first_harvest',emoji:'🍅', name:'Première récolte',    desc:'Première récolte notée',   cond: s=>s.journalEntries.some(e=>e.type==='harvest') },
+  { id:'w100',         emoji:'💧', name:'100 arrosages',       desc:'100 arrosages enregistrés',cond: s=>(s.wateringHistory||[]).length>=5 },
+  { id:'winter',       emoji:'❄️', name:'Jardinier d\'hiver',  desc:'Entrée en hiver',          cond: s=>{ const m=new Date().getMonth(); return m>=11||m<=1; } },
+  { id:'seasons',      emoji:'🔄', name:'4 saisons',           desc:'Un an de jardinage',       cond: s=>s.gardenPoints>=200, rare:true },
+  { id:'helper',       emoji:'🌍', name:'10 voisins aidés',    desc:'10 réponses communauté',   cond: _=>false },
+  { id:'anniversary',  emoji:'🎂', name:'1 an de jardin',      desc:'365 jours avec GardenMinder',cond: s=>s.gardenPoints>=300, rare:true },
+];
+
+const GARDEN_LEVELS = [
+  { min:0,   max:100,  name:'Jardin Débutant',  emoji:'🌱' },
+  { min:100, max:250,  name:'Jardin Apprenti',  emoji:'🌿' },
+  { min:250, max:500,  name:'Jardin Confirmé',  emoji:'🍃' },
+  { min:500, max:900,  name:'Jardin Expert',    emoji:'🌳' },
+  { min:900, max:9999, name:'Jardin Maître',    emoji:'🏡' },
+];
+
+let currentEntryType = 'action';
+let entryShareOn = false;
+
+// ── TAB SWITCHING (extended for new tabs) ─────────────────────────────────────
+function switchTab(tab, el) {
+  // Update nav items
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Hide all overlay tabs
+  ['tab-history','tab-alerts','tab-settings','tab-journal','tab-community','tab-memory'].forEach(id => {
+    const t = document.getElementById(id);
+    if (t) t.classList.add('hidden');
+  });
+
+  // Hide/show FAB
+  const fab = document.getElementById('journal-fab');
+
+  const tabMap = {
+    home: () => { if(fab)fab.style.display='none'; },
+    history: () => { document.getElementById('tab-history').classList.remove('hidden'); renderHistoryTab(); if(fab)fab.style.display='none'; },
+    alerts: () => { document.getElementById('tab-alerts').classList.remove('hidden'); renderAlertsTab(); if(fab)fab.style.display='none'; },
+    settings: () => { document.getElementById('tab-settings').classList.remove('hidden'); renderSettingsTab(); if(fab)fab.style.display='none'; },
+    journal: () => { document.getElementById('tab-journal').classList.remove('hidden'); renderJournalTab(); if(fab)fab.style.display='flex'; },
+    community: () => {
+      document.getElementById('tab-community').classList.remove('hidden');
+      document.getElementById('com-badge').style.display='none';
+      if(fab)fab.style.display='none';
+    },
+    memory: () => { document.getElementById('tab-memory').classList.remove('hidden'); renderMemoryTab(); if(fab)fab.style.display='none'; },
+  };
+  if (tabMap[tab]) tabMap[tab]();
+}
+
+// ── JOURNAL FUNCTIONS ─────────────────────────────────────────────────────────
+function openEntrySheet() {
+  document.getElementById('entry-overlay').classList.add('open');
+  document.getElementById('entry-sheet').classList.add('open');
+  // Populate plant picker
+  const picker = document.getElementById('entry-plant-picker');
+  picker.innerHTML = state.selectedPlants.map((k,i) => {
+    const p = PLANT_DB[k];
+    return `<div class="plant-chip-pick ${i===0?'selected':''}" onclick="selectEntryPlant(this)">${p.emoji} ${p.name}</div>`;
+  }).join('') + '<div class="plant-chip-pick" onclick="selectEntryPlant(this)">🌱 Tout le jardin</div>';
+  document.getElementById('entry-text').value = '';
+}
+function closeEntrySheet() {
+  document.getElementById('entry-overlay').classList.remove('open');
+  document.getElementById('entry-sheet').classList.remove('open');
+}
+function selectEntryType(btn, type) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  currentEntryType = type;
+}
+function selectEntryPlant(chip) {
+  document.querySelectorAll('.plant-chip-pick').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+}
+function toggleEntryShare() {
+  entryShareOn = !entryShareOn;
+  const sw = document.getElementById('entry-share-toggle');
+  sw.classList.toggle('off', !entryShareOn);
+}
+function submitJournalEntry() {
+  const text = document.getElementById('entry-text').value.trim();
+  const plantEl = document.querySelector('.plant-chip-pick.selected');
+  const plant = plantEl ? plantEl.textContent.trim() : '🌱 Jardin';
+  const now = new Date();
+  const entry = {
+    id: Date.now(),
+    type: currentEntryType,
+    plant,
+    text: text || ENTRY_TYPES[currentEntryType].label + ' enregistré',
+    shared: entryShareOn,
+    date: now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}),
+    time: now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    ts: now.toISOString(),
+  };
+  state.journalEntries.unshift(entry);
+  // Add garden points
+  const pts = { action:5, note:3, harvest:10, problem:4, treatment:6, photo:8 };
+  state.gardenPoints = (state.gardenPoints||0) + (pts[currentEntryType]||5);
+  saveState();
+  closeEntrySheet();
+  showToast('✅ Entrée ajoutée au journal !');
+  checkBadges();
+  renderJournalTab();
+  if (document.getElementById('tab-memory') && !document.getElementById('tab-memory').classList.contains('hidden')) renderMemoryTab();
+}
+function setJournalSeg(btn, mode) {
+  document.querySelectorAll('.journal-seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function renderJournalTab() {
+  const entries = state.journalEntries || [];
+  const thisMonth = entries.filter(e => {
+    const d = new Date(e.ts || Date.now());
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const sid = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  sid('jsv-entries', thisMonth.length);
+  sid('jsv-harvest', thisMonth.filter(e=>e.type==='harvest').length);
+  sid('jsv-problems', thisMonth.filter(e=>e.type==='problem').length);
+  sid('jsv-shared', thisMonth.filter(e=>e.shared).length);
+
+  const timeline = document.getElementById('journal-timeline');
+  if (!entries.length) {
+    timeline.innerHTML = `<div style="text-align:center;padding:40px 24px;color:var(--text-light);">
+      <div style="font-size:3rem;margin-bottom:12px;">📖</div>
+      <div style="font-family:var(--ff-display);font-style:italic;font-size:1.1rem;color:var(--text-mid);margin-bottom:8px;">Votre journal est vide</div>
+      <div style="font-size:0.85rem;">Ajoutez votre première entrée en appuyant sur + Entrée</div>
+    </div>`;
+    return;
+  }
+
+  let html = '<div class="journal-month">Récent</div>';
+  entries.slice(0, 20).forEach((e, i) => {
+    const t = ENTRY_TYPES[e.type] || ENTRY_TYPES.note;
+    html += `<div class="journal-entry" style="animation-delay:${i*0.04}s">
+      <div class="journal-line">
+        <div class="journal-dot ${e.type}" style="background:${t.color};color:${t.text};">${t.icon}</div>
+        ${i < entries.length-1 ? '<div class="journal-connector"></div>' : ''}
+      </div>
+      <div class="journal-card">
+        <div class="jcard-top">
+          <div class="jcard-plant">
+            <div>
+              <div class="jcard-plant-name">${e.plant}</div>
+              <div class="jcard-time">${e.date || ''} · ${e.time || ''}</div>
+            </div>
+          </div>
+          <span class="jcard-tag ${e.type}" style="background:${t.color};color:${t.text};">${t.label}</span>
+        </div>
+        <div class="jcard-text">${e.text}</div>
+        <div class="jcard-chips">
+          ${e.shared ? '<span class="jcard-chip">🌍 Partagée</span>' : ''}
+          <span class="jcard-shared">${e.shared ? '❤️ Communauté' : ''}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+  timeline.innerHTML = html;
+}
+
+// ── COMMUNAUTÉ ────────────────────────────────────────────────────────────────
+function setComTab(btn) {
+  document.querySelectorAll('.com-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function toggleComLike(btn) {
+  btn.classList.toggle('liked');
+  const num = parseInt(btn.textContent.match(/\d+/)?.[0]||'0');
+  btn.innerHTML = btn.classList.contains('liked') ? `❤️ ${num+1}` : `🤍 ${num-1}`;
+}
+
+// ── MÉMOIRE VIVANTE ───────────────────────────────────────────────────────────
+function renderMemoryTab() {
+  const pts = state.gardenPoints || 0;
+  // Level
+  const level = GARDEN_LEVELS.find(l => pts >= l.min && pts < l.max) || GARDEN_LEVELS[0];
+  const levelIdx = GARDEN_LEVELS.indexOf(level);
+  const progress = Math.round(((pts - level.min) / (level.max - level.min)) * 100);
+  const sid = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  sid('garden-level-num', levelIdx + 1);
+  sid('garden-level-name', level.name);
+  sid('garden-level-sub', `${Math.round(progress)}% vers "${GARDEN_LEVELS[Math.min(levelIdx+1,4)].name}"`);
+  sid('garden-level-pts', `${pts} / ${level.max} points`);
+  const bar = document.getElementById('garden-level-bar');
+  if (bar) bar.style.width = progress + '%';
+
+  // Streak
+  const streak = state.weeklyStreak || 0;
+  sid('streak-num', `🔥 ${streak}`);
+  const weeksEl = document.getElementById('streak-weeks');
+  if (weeksEl) {
+    weeksEl.innerHTML = Array.from({length:8},(_,i) => {
+      const cls = i < streak ? 'done' : i === streak ? 'current' : 'empty';
+      return `<div class="week-dot ${cls}">S${i+1}</div>`;
+    }).join('');
+  }
+
+  // Badges
+  checkBadges();
+  const badgesEl = document.getElementById('badges-grid');
+  if (badgesEl) {
+    badgesEl.innerHTML = ALL_BADGES.map(b => {
+      const earned = (state.earnedBadges||[]).includes(b.id);
+      const cls = earned ? (b.rare?'rare':'earned') : 'locked';
+      return `<div class="badge-item ${cls}" title="${b.desc}">
+        <span class="badge-emoji">${b.emoji}</span>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-date">${earned ? (b.rare?'⭐ Rare':'Débloqué') : 'Verrouillé'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Saisons
+  const entries = state.journalEntries || [];
+  const seasonEntries = (monthRange) => {
+    const count = entries.filter(e => {
+      const m = new Date(e.ts||Date.now()).getMonth();
+      return monthRange.includes(m);
+    }).length;
+    return count > 0 ? `${count} entrée${count>1?'s':''} · ${entries.filter(e=>monthRange.includes(new Date(e.ts||Date.now()).getMonth())&&e.type==='harvest').length} récolte${entries.filter(e=>monthRange.includes(new Date(e.ts||Date.now()).getMonth())&&e.type==='harvest').length>1?'s':''}` : 'Aucune entrée';
+  };
+  sid('season-spring', seasonEntries([2,3,4]));
+  sid('season-summer', seasonEntries([5,6,7]));
+  sid('season-autumn', seasonEntries([8,9,10]));
+  sid('season-winter', seasonEntries([11,0,1]));
+}
+
+function checkBadges() {
+  if (!state.earnedBadges) state.earnedBadges = [];
+  ALL_BADGES.forEach(b => {
+    if (!state.earnedBadges.includes(b.id) && b.cond(state)) {
+      state.earnedBadges.push(b.id);
+      showToast(`🏆 Badge débloqué : ${b.name} !`);
+    }
+  });
+  saveState();
+}
+
+// ── FAB for journal ───────────────────────────────────────────────────────────
+// (FAB injected dynamically)
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 document.getElementById('wizard-back').style.display='none';
@@ -2572,6 +3321,20 @@ function renderAccountInHeader() {
 // Boot : check localStorage → skip wizard if already configured
 (function boot() {
   const restored = loadState();
+  // Init new state fields if missing
+  if (!state.journalEntries) state.journalEntries = [];
+  if (!state.weeklyStreak) state.weeklyStreak = 0;
+  if (!state.gardenPoints) state.gardenPoints = 0;
+  if (!state.earnedBadges) state.earnedBadges = [];
+
+  // Inject FAB for journal
+  const fab = document.createElement('button');
+  fab.className = 'fab'; fab.id = 'journal-fab';
+  fab.innerHTML = '✏️'; fab.title = 'Nouvelle entrée';
+  fab.style.display = 'none';
+  fab.onclick = () => openEntrySheet();
+  document.body.appendChild(fab);
+
   if (restored && isSetupDone()) {
     fetchWeather().then(() => { initApp(); goTo('app'); });
     return;
@@ -2579,7 +3342,7 @@ function renderAccountInHeader() {
   if (restored && state.account && !isSetupDone()) {
     goTo('wizard'); return;
   }
-  // else: landing page active by default (screen-landing is .active in HTML)
+  // else: landing page active by default
 })();
 </script>
 
@@ -2588,16 +3351,16 @@ function renderAccountInHeader() {
 #install-banner{position:fixed;bottom:0;left:0;right:0;z-index:500;background:white;border-top:1px solid rgba(0,0,0,0.1);box-shadow:0 -4px 24px rgba(26,58,42,0.18);padding:16px 20px 32px;display:none;flex-direction:column;gap:10px;transform:translateY(100%);transition:transform 0.35s ease;}
 #install-banner.visible{transform:translateY(0);}
 .ib-header{display:flex;align-items:center;justify-content:space-between;}
-.ib-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--text-dark);}
+.ib-title{font-family:var(--ff-display);font-size:1rem;font-weight:600;color:var(--text-dark);}
 .ib-close{background:var(--green-mist);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
 .ib-sub{font-size:0.82rem;color:var(--text-mid);line-height:1.5;}
-#install-btn-android{background:var(--green-mid);color:white;border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
+#install-btn-android{background:var(--green-mid);color:white;border:none;border-radius:12px;padding:14px;font-family:var(--ff-body);font-size:0.95rem;font-weight:600;cursor:pointer;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
 .ios-step{display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-mid);line-height:1.6;margin-bottom:4px;}
 .ios-step-num{font-size:16px;flex-shrink:0;}
 </style>
 <div id="install-banner">
-  <div class="ib-header"><div class="ib-title">💧 Installer AlertGarden</div><button class="ib-close" onclick="hideInstallBanner()">✕</button></div>
-  <div class="ib-sub">Accédez à votre jardin en un tap, même sans connexion.</div>
+  <div class="ib-header"><div class="ib-title">🌱 Installer GardenMinder</div><button class="ib-close" onclick="hideInstallBanner()">✕</button></div>
+  <div class="ib-sub">Accédez à votre jardin et votre journal en un tap, même sans connexion.</div>
   <button id="install-btn-android" onclick="triggerInstall()">📲 Installer l'application</button>
   <div id="install-guide-ios" style="display:none;">
     <div class="ios-step"><div class="ios-step-num">1️⃣</div><div>Appuyez sur <strong>Partager</strong> (↑ en bas de Safari)</div></div>
