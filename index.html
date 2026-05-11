@@ -1606,15 +1606,31 @@ function daysUntilWatering(key){
 }
 
 // Stocke les précipitations reçues depuis Open-Meteo en local (jusqu'à 12 mois)
+// Les 3 derniers jours sont TOUJOURS écrasés (Open-Meteo les met à jour en cours de journée)
+// Les jours plus anciens ne sont stockés qu'une seule fois (valeur définitive)
 function mergePrecipToLocal(times, sums){
   if(!times||!sums)return;
   const today=new Date().toISOString().slice(0,10);
-  // N'intégrer que les jours passés (pas les prévisions futures)
+  // Calculer la date limite : jours < 3 jours → toujours réécrire
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-3);
+  const cutoffStr=cutoff.toISOString().slice(0,10);
+
   times.forEach((t,i)=>{
-    if(t>today)return; // futur : ignorer
-    const already=state.precipLocalHistory.find(p=>p.date===t);
-    if(!already){
-      state.precipLocalHistory.push({date:t, mm:parseFloat((sums[i]||0).toFixed(1))});
+    if(t>today)return; // futur strict : ignorer
+    const mm=parseFloat((sums[i]||0).toFixed(1));
+    const existingIdx=state.precipLocalHistory.findIndex(p=>p.date===t);
+    if(t>=cutoffStr){
+      // Jour récent (aujourd'hui, hier, avant-hier) → toujours écraser
+      if(existingIdx!==-1){
+        state.precipLocalHistory[existingIdx].mm=mm;
+      } else {
+        state.precipLocalHistory.push({date:t, mm});
+      }
+    } else {
+      // Jour ancien → stocker une seule fois (valeur définitive)
+      if(existingIdx===-1){
+        state.precipLocalHistory.push({date:t, mm});
+      }
     }
   });
   // Trier par date et garder max 400 entrées (~13 mois)
@@ -1688,6 +1704,9 @@ function initApp(){
     if(days>0&&days<=7){nudge.style.display='flex';if(daysEl)daysEl.textContent=days;}
     else if(days===0){goTo('trial-end');return;}
   }
+  // Recalcul centralisé : écrit les valeurs à jour dans state.plantMoisture
+  // Garantit que updateHeroScore, renderPlantStrip et openPlantDetail lisent tous la même valeur
+  refreshAllMoisture();
   updateHeroScore();
   renderPlantStrip();
   renderForecast();
@@ -1695,20 +1714,28 @@ function initApp(){
   renderAccountInHeader();
 }
 
+// Calcule l'humidité affichée d'une plante (lecture seule, n'écrit PAS dans state)
 function computeMoisture(key){
   const plant=PLANT_DB[key];
   const retention=SOIL_RETENTION[state.soil]||1;
   const expose=EXPOSE_FACTOR[state.expose]||1;
-  // Lire le score stocké SANS le modifier ici
   let m=state.plantMoisture[key];
   if(m===undefined||m===null)m=60;
   const et=plant.waterNeed*expose/retention;
-  // Calcul de lecture seule — on applique les deltas du jour uniquement pour l'affichage
   const rain=getRainToday();
+  // Décroissance du jour + apport pluie du jour + calibration
   let display=m - et*0.8 + rain*0.7;
   display = display * state.calibration.soilMultiplier + state.calibration.offset;
   display=Math.min(100,Math.max(5,display));
   return display;
+}
+
+// Applique computeMoisture et ÉCRIT le résultat dans state — à appeler une fois par refresh météo
+// C'est la seule fonction qui modifie state.plantMoisture (hors arrosage manuel)
+function refreshAllMoisture(){
+  state.selectedPlants.forEach(k=>{
+    state.plantMoisture[k]=computeMoisture(k);
+  });
 }
 function getMoistureLevel(pct){
   if(pct<35)return{label:'Arroser',cls:'red',action:'danger',badge:'🔴 Urgent'};
@@ -1716,8 +1743,12 @@ function getMoistureLevel(pct){
   return{label:'OK',cls:'green',action:'ok',badge:'🟢 OK'};
 }
 function updateHeroScore(){
+  // state.plantMoisture est déjà synchronisé par refreshAllMoisture()
   let minMoisture=100, worstPlant=null;
-  state.selectedPlants.forEach(k=>{const m=computeMoisture(k);if(m<minMoisture){minMoisture=m;worstPlant=k;}});
+  state.selectedPlants.forEach(k=>{
+    const m=state.plantMoisture[k]||60;
+    if(m<minMoisture){minMoisture=m;worstPlant=k;}
+  });
   const pct=Math.round(minMoisture);
   const lvl=getMoistureLevel(pct);
   const arcEl=document.getElementById('gauge-arc');
@@ -1747,13 +1778,14 @@ function renderPlantStrip(){
   strip.innerHTML='';
   state.selectedPlants.forEach(k=>{
     const plant=PLANT_DB[k];
+    // state.plantMoisture[k] est déjà calculé par refreshAllMoisture
     const pct=Math.round(state.plantMoisture[k]||60);
     const lvl=getMoistureLevel(pct);
     const row=document.createElement('div');
     row.className='plant-row';
     row.onclick=()=>openPlantDetail(k);
     row.innerHTML=`<div class="plant-row-icon">${plant.emoji}</div>
-      <div class="plant-row-info"><div class="plant-row-name">${plant.name}</div><div class="plant-row-sub">${plant.label} · ${plant.waterNeed}mm/j</div></div>
+      <div class="plant-row-info"><div class="plant-row-name">${plant.name}</div><div class="plant-row-sub">${plant.label} · ${pct}% · ${plant.waterNeed}mm/j</div></div>
       <div class="plant-row-status"><div class="status-badge ${lvl.cls}">${lvl.label}</div><div class="plant-row-arrow">›</div></div>`;
     strip.appendChild(row);
   });
@@ -1794,6 +1826,7 @@ function updateStats(){
 function openPlantDetail(key){
   currentPlant=key;prevScreen='app';
   const plant=PLANT_DB[key];
+  // state.plantMoisture[key] est déjà synchronisé par refreshAllMoisture
   const pct=Math.round(state.plantMoisture[key]||60);
   const lvl=getMoistureLevel(pct);
   document.getElementById('detail-emoji').textContent=plant.emoji;
