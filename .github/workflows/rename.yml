@@ -4,11 +4,14 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   rename:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Find and rename HTML file to index.html
         run: |
@@ -22,7 +25,3 @@ jobs:
             git commit -m "auto: rename to index.html"
             git push
           fi
-
-      - name: Nothing to rename
-        if: success()
-        run: echo "index.html already exists or no HTML file found"
