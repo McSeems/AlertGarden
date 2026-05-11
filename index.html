@@ -239,6 +239,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .period-tabs{display:flex;background:var(--green-mist);border-radius:10px;padding:3px;margin:0 16px 16px;}
 .period-tab{flex:1;padding:8px;text-align:center;font-size:0.85rem;font-weight:500;color:var(--text-mid);cursor:pointer;border-radius:8px;transition:all 0.2s;}
 .period-tab.active{background:white;color:var(--green-deep);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+/* Mini sélecteurs de période par tableau */
+.mini-period-tabs{display:flex;background:var(--green-mist);border-radius:8px;padding:2px;gap:1px;}
+.mini-period-tab{padding:5px 10px;text-align:center;font-size:0.72rem;font-weight:500;color:var(--text-mid);cursor:pointer;border-radius:6px;transition:all 0.2s;white-space:nowrap;}
+.mini-period-tab.active{background:white;color:var(--green-deep);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
 .big-chart{background:white;margin:0 16px 12px;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
 .big-chart-title{font-size:0.8rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;}
 .chart-area{height:120px;display:flex;align-items:flex-end;gap:2px;}
@@ -878,20 +882,47 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 <div id="tab-history" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="history-screen-header"><div class="screen-title">Historique</div></div>
   <div style="flex:1;overflow-y:auto;padding-bottom:80px;">
-    <div style="padding:16px;">
-      <div class="period-tabs">
-        <div class="period-tab active" onclick="setPeriod(this,'7j')">7J</div>
-        <div class="period-tab" onclick="setPeriod(this,'30j')">30J</div>
-        <div class="period-tab" onclick="setPeriod(this,'12m')">12M</div>
+
+    <!-- PRÉCIPITATIONS (en premier) -->
+    <div class="big-chart">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="big-chart-title" style="margin:0;" id="precip-chart-title">🌧️ Précipitations (mm)</div>
+        <div class="mini-period-tabs">
+          <div class="mini-period-tab active" onclick="setChartPeriod(this,'precip','7j')">7J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'precip','30j')">30J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'precip','12m')">12M</div>
+        </div>
       </div>
-    </div>
-    <div class="big-chart"><div class="big-chart-title">💧 Humidité du sol (%)</div><div class="chart-area" id="history-chart-humidity"></div></div>
-    <div class="big-chart" style="margin-top:0;"><div class="big-chart-title">🪣 Arrosages (litres)</div><div class="chart-area" id="history-chart-water"></div></div>
-    <div style="background:white;margin:0 16px 12px;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
-      <div class="big-chart-precip-title" style="font-size:0.8rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🌧️ Précipitations — 7 derniers jours (mm)</div>
-      <div id="precip-bars" style="height:90px;display:flex;align-items:flex-end;gap:1px;"></div>
+      <div class="chart-area" id="history-chart-precip"></div>
       <div id="precip-totals" style="display:flex;gap:16px;margin-top:8px;font-size:0.82rem;color:var(--text-mid);"></div>
     </div>
+
+    <!-- HUMIDITÉ -->
+    <div class="big-chart">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="big-chart-title" style="margin:0;">💧 Humidité du sol (%)</div>
+        <div class="mini-period-tabs">
+          <div class="mini-period-tab active" onclick="setChartPeriod(this,'humidity','7j')">7J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'humidity','30j')">30J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'humidity','12m')">12M</div>
+        </div>
+      </div>
+      <div class="chart-area" id="history-chart-humidity"></div>
+    </div>
+
+    <!-- ARROSAGES -->
+    <div class="big-chart">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="big-chart-title" style="margin:0;">🪣 Arrosages (litres)</div>
+        <div class="mini-period-tabs">
+          <div class="mini-period-tab active" onclick="setChartPeriod(this,'water','7j')">7J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'water','30j')">30J</div>
+          <div class="mini-period-tab" onclick="setChartPeriod(this,'water','12m')">12M</div>
+        </div>
+      </div>
+      <div class="chart-area" id="history-chart-water"></div>
+    </div>
+
     <div class="history-content">
       <div class="history-summary">
         <div class="summary-card"><div class="summary-val" id="hist-total-l">—</div><div class="summary-label">Litres arrosés</div></div>
@@ -1328,6 +1359,7 @@ let state = {
   selectedPlants:[], plantMoisture:{},
   wateringHistory:[], autoSchedules:[],
   weather:null, forecast:[], precipHistory:[],
+  precipLocalHistory:[], // {date:'YYYY-MM-DD', mm:float} — accumulé en local sur 12 mois
   advParams:{kc:1.0, windFactor:1.0, drain:3, efficiency:75, depth:30},
   calibration:{ offset:0, soilMultiplier:1.0, notes:'' },
   premium:{ active:false, type:null, trialStart:null, purchased:false },
@@ -1536,18 +1568,75 @@ function finalizeSetup(){
 }
 
 // ── WEATHER ──────────────────────────────────────────────────────────────────
+
+// Source unique pour la pluie d'aujourd'hui (prévision daily, pas current)
+function getRainToday(){
+  if(!state.forecast||!state.forecast.time)return 0;
+  const today=new Date().toISOString().slice(0,10);
+  const idx=state.forecast.time.indexOf(today);
+  return idx!==-1?(state.forecast.precipitation_sum[idx]||0):0;
+}
+
+// Simulation prochain arrosage sur 14 jours avec les pluies prévues
+function daysUntilWatering(key){
+  if(!state.selectedPlants.includes(key))return null;
+  const plant=PLANT_DB[key];
+  const retention=SOIL_RETENTION[state.soil]||1;
+  const expose=EXPOSE_FACTOR[state.expose]||1;
+  const dailyLoss=plant.waterNeed*expose/retention;
+  let score=state.plantMoisture[key]||60;
+  const today=new Date().toISOString().slice(0,10);
+  for(let i=0;i<14;i++){
+    // Pluie prévue pour ce jour
+    let forecastRain=0;
+    if(state.forecast&&state.forecast.time){
+      const d=new Date();d.setDate(d.getDate()+i);
+      const ds=d.toISOString().slice(0,10);
+      const fi=state.forecast.time.indexOf(ds);
+      if(fi!==-1)forecastRain=(state.forecast.precipitation_sum[fi]||0);
+    }
+    score=score-dailyLoss*0.8+forecastRain*0.7;
+    score=Math.min(100,Math.max(0,score));
+    if(score<35){
+      if(i===0)return'Ce soir !';
+      return'Dans '+i+'j';
+    }
+  }
+  return'+14j';
+}
+
+// Stocke les précipitations reçues depuis Open-Meteo en local (jusqu'à 12 mois)
+function mergePrecipToLocal(times, sums){
+  if(!times||!sums)return;
+  const today=new Date().toISOString().slice(0,10);
+  // N'intégrer que les jours passés (pas les prévisions futures)
+  times.forEach((t,i)=>{
+    if(t>today)return; // futur : ignorer
+    const already=state.precipLocalHistory.find(p=>p.date===t);
+    if(!already){
+      state.precipLocalHistory.push({date:t, mm:parseFloat((sums[i]||0).toFixed(1))});
+    }
+  });
+  // Trier par date et garder max 400 entrées (~13 mois)
+  state.precipLocalHistory.sort((a,b)=>a.date.localeCompare(b.date));
+  if(state.precipLocalHistory.length>400)state.precipLocalHistory=state.precipLocalHistory.slice(-400);
+}
+
 async function fetchWeather(){
-  let url;
   if(!state.lat||!state.lon){
     const geo=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(state.city||'Paris')+'&count=1&language=fr').then(r=>r.json()).catch(()=>null);
     if(geo&&geo.results&&geo.results.length){state.lat=geo.results[0].latitude;state.lon=geo.results[0].longitude;state.city=geo.results[0].name;}
     else{state.lat=48.8566;state.lon=2.3522;state.city='Paris';}
   }
-  url='https://api.open-meteo.com/v1/forecast?latitude='+state.lat+'&longitude='+state.lon+'&current=temperature_2m,windspeed_10m,precipitation&daily=precipitation_sum,temperature_2m_max,weathercode&forecast_days=7&past_days=30&timezone=auto';
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+state.lat+'&longitude='+state.lon
+    +'&current=temperature_2m,windspeed_10m,precipitation&daily=precipitation_sum,temperature_2m_max,weathercode'
+    +'&forecast_days=7&past_days=92&timezone=auto';
   try{
     const d=await fetch(url).then(r=>r.json());
-    state.weather=d.current;state.forecast=d.daily;
+    state.weather=d.current;
+    state.forecast=d.daily;
     state.precipHistory=(d.daily&&d.daily.precipitation_sum)?d.daily.precipitation_sum.slice(0,7):[];
+    mergePrecipToLocal(d.daily&&d.daily.time, d.daily&&d.daily.precipitation_sum);
     applyWindFactor();
   }catch(e){
     state.weather={temperature_2m:22,windspeed_10m:15,precipitation:0};
@@ -1573,15 +1662,22 @@ function initApp(){
   }
   if(state.weather){
     const _wt=document.getElementById('w-temp'); if(_wt) _wt.textContent=Math.round(state.weather.temperature_2m)+'°C';
-    const _wr=document.getElementById('w-rain'); if(_wr) _wr.textContent=(state.weather.precipitation||0).toFixed(1)+' mm';
+    // Pluie du jour = prévision daily (source unique getRainToday)
+    const _wr=document.getElementById('w-rain'); if(_wr) _wr.textContent=getRainToday().toFixed(1)+' mm';
     const _r7=document.getElementById('w-rain7');
     if(_r7){
-      const today=new Date().toISOString().slice(0,10);
       const allT=(state.forecast&&state.forecast.time)||[];
       const allP=(state.forecast&&state.forecast.precipitation_sum)||[];
       let sum7=0;
       for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const idx=allT.indexOf(d.toISOString().slice(0,10));if(idx!==-1)sum7+=allP[idx]||0;}
       _r7.textContent=sum7.toFixed(1)+' mm';
+    }
+    // Prochain arrosage — plante la plus urgente
+    const _nw=document.getElementById('w-next-water');
+    if(_nw&&state.selectedPlants.length>0){
+      let worst=null,worstScore=Infinity;
+      state.selectedPlants.forEach(k=>{const s=state.plantMoisture[k]||60;if(s<worstScore){worstScore=s;worst=k;}});
+      if(worst)_nw.textContent=daysUntilWatering(worst);
     }
   }
   // Trial nudge
@@ -1603,16 +1699,16 @@ function computeMoisture(key){
   const plant=PLANT_DB[key];
   const retention=SOIL_RETENTION[state.soil]||1;
   const expose=EXPOSE_FACTOR[state.expose]||1;
-  let m=state.plantMoisture[key]||60;
+  // Lire le score stocké SANS le modifier ici
+  let m=state.plantMoisture[key];
+  if(m===undefined||m===null)m=60;
   const et=plant.waterNeed*expose/retention;
-  m-=et*0.8;
-  const rain=state.forecast&&state.forecast.precipitation_sum?(state.forecast.precipitation_sum[0]||0):0;
-  m+=rain*5;
-  // Apply calibration
-  m = m * state.calibration.soilMultiplier + state.calibration.offset;
-  m=Math.min(100,Math.max(5,m));
-  state.plantMoisture[key]=m;
-  return m;
+  // Calcul de lecture seule — on applique les deltas du jour uniquement pour l'affichage
+  const rain=getRainToday();
+  let display=m - et*0.8 + rain*0.7;
+  display = display * state.calibration.soilMultiplier + state.calibration.offset;
+  display=Math.min(100,Math.max(5,display));
+  return display;
 }
 function getMoistureLevel(pct){
   if(pct<35)return{label:'Arroser',cls:'red',action:'danger',badge:'🔴 Urgent'};
@@ -1636,13 +1732,14 @@ function updateHeroScore(){
   if(indicator&&worstPlant)indicator.textContent='Pire : '+PLANT_DB[worstPlant].emoji+' '+PLANT_DB[worstPlant].name;
   const alertText=document.getElementById('hero-alert-text');
   const alertIcon=document.getElementById('hero-alert-icon');
+  const _nw=document.getElementById('w-next-water');
   if(worstPlant&&alertText){
     const p=PLANT_DB[worstPlant];
-    const days=Math.max(0,Math.round((pct-35)/8));
+    const nextWater=daysUntilWatering(worstPlant);
     if(pct<35){if(alertIcon)alertIcon.textContent='⚠️';alertText.textContent=p.emoji+' '+p.name+' — arrosage recommandé ce soir.';}
     else if(pct<60){if(alertIcon)alertIcon.textContent='👁️';alertText.textContent=p.emoji+' '+p.name+' à surveiller. Vérification dans 24h.';}
-    else{if(alertIcon)alertIcon.textContent='✅';alertText.textContent='Jardin en bonne santé. Prochain arrosage dans ~'+days+' jours.';}
-  const _nw=document.getElementById('w-next-water');if(_nw)_nw.textContent=pct<35?'Ce soir !':'Dans '+days+' j';
+    else{if(alertIcon)alertIcon.textContent='✅';alertText.textContent='Jardin en bonne santé. Prochain arrosage : '+nextWater+'.';}
+    if(_nw)_nw.textContent=nextWater;
   }
 }
 function renderPlantStrip(){
@@ -1709,18 +1806,19 @@ function openPlantDetail(key){
   document.getElementById('detail-percent').textContent=pct+'%';
   document.getElementById('detail-gauge-sub').textContent='Sol '+state.soil+' · Exposition '+state.expose+(state.calibration.offset!==0?' · Calibré':'');
   document.getElementById('detail-need').textContent=plant.waterNeed+'mm/j';
-  const rain=state.forecast&&state.forecast.precipitation_sum?(state.forecast.precipitation_sum[0]||0):0;
-  document.getElementById('detail-rain-today').textContent=rain.toFixed(1)+'mm';
+  // Pluie du jour = prévision (source unique)
+  document.getElementById('detail-rain-today').textContent=getRainToday().toFixed(1)+'mm';
   const plantHistory=state.wateringHistory.filter(e=>e.plant===key||!e.plant);
   const lastW=plantHistory[0];
   document.getElementById('detail-last-water').textContent=lastW?lastW.liters+'L':'Jamais';
-  const daysToNext=Math.max(0,Math.round((pct-35)/8));
-  document.getElementById('detail-next-water').textContent=daysToNext===0?'Ce soir':'Dans '+daysToNext+'j';
+  const nextWater=daysUntilWatering(key);
+  document.getElementById('detail-next-water').textContent=nextWater||'—';
   const ac=document.getElementById('detail-action-card');
   ac.className='action-card '+lvl.action;
+  const nextWaterTxt=daysUntilWatering(key);
   if(pct<35){document.getElementById('detail-action-title').textContent='⚠️ Arrosage recommandé aujourd\'hui';document.getElementById('detail-action-body').textContent=plant.name+' sont à '+pct+'% d\'humidité. Apportez environ '+Math.round(plant.waterNeed*state.surface/100)+'L ce soir.';}
-  else if(pct<60){document.getElementById('detail-action-title').textContent='👁️ À surveiller';document.getElementById('detail-action-body').textContent=plant.name+' sont correctement hydratés. Arrosage prévu dans '+daysToNext+' jours si pas de pluie.';}
-  else{document.getElementById('detail-action-title').textContent='✅ Jardin en bonne santé';document.getElementById('detail-action-body').textContent=plant.name+' n\'ont pas besoin d\'eau pour les prochains '+daysToNext+' jours. Météo favorable.';}
+  else if(pct<60){document.getElementById('detail-action-title').textContent='👁️ À surveiller';document.getElementById('detail-action-body').textContent=plant.name+' sont correctement hydratés. Arrosage prévu '+nextWaterTxt+' si pas de pluie.';}
+  else{document.getElementById('detail-action-title').textContent='✅ Jardin en bonne santé';document.getElementById('detail-action-body').textContent=plant.name+' n\'ont pas besoin d\'eau pour l\'instant. Prochain arrosage : '+nextWaterTxt+'.';}
   const chart=document.getElementById('detail-chart');
   const labels=document.getElementById('detail-chart-labels');
   const days7=['J-6','J-5','J-4','J-3','J-2','Hier','Auj.'];
@@ -1823,13 +1921,59 @@ function purchasePremium(){
 }
 
 // ── HISTORY TAB ───────────────────────────────────────────────────────────────
-let currentHistoryPeriod = '7j';
+// Périodes indépendantes par tableau
+let chartPeriods = { precip:'7j', humidity:'7j', water:'7j' };
 
-function setPeriod(el, period) {
-  document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
+function setChartPeriod(el, chart, period) {
+  // Désactiver les onglets du même groupe
+  const parent = el.parentElement;
+  parent.querySelectorAll('.mini-period-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  currentHistoryPeriod = period;
-  renderHistoryTab();
+  chartPeriods[chart] = period;
+  // Re-render uniquement le tableau concerné
+  if(chart==='precip')   renderPrecipChart();
+  if(chart==='humidity') renderHumidityChart();
+  if(chart==='water')    renderWaterChart();
+}
+
+function renderPrecipChart(){
+  const period = chartPeriods.precip;
+  const precipData = getPrecipData(period);
+  renderBarChart('history-chart-precip', precipData, 'var(--water)', 'var(--water-light)', 'mm');
+  const precipVals = (precipData.values||[]).filter(v=>v!==null&&v>0);
+  const pt = document.getElementById('precip-totals');
+  if(pt){
+    const total = precipVals.reduce((a,b)=>a+b,0);
+    const max   = precipVals.length ? Math.max(...precipVals) : 0;
+    const label12m = period==='12m' && state.precipLocalHistory && state.precipLocalHistory.length > 92
+      ? ' <span style="color:var(--green-light);font-size:0.75rem;">📦 données locales</span>' : '';
+    pt.innerHTML = '<span>Total : <strong style="color:var(--water);">'+total.toFixed(1)+'mm</strong></span>'
+                 + '<span>Max jour : <strong style="color:var(--water);">'+max.toFixed(1)+'mm</strong></span>'
+                 + label12m;
+  }
+}
+function renderHumidityChart(){
+  renderBarChart('history-chart-humidity', getMoistureData(chartPeriods.humidity), 'var(--green-mid)', 'var(--green-pale)', '%');
+}
+function renderWaterChart(){
+  renderBarChart('history-chart-water', getWaterData(chartPeriods.water), 'var(--water)', 'var(--water-light)', 'L');
+}
+
+function renderHistoryTab(){
+  renderPrecipChart();
+  renderHumidityChart();
+  renderWaterChart();
+
+  const totalL = state.wateringHistory.reduce((s,e)=>s+(e.liters||0),0);
+  const cost   = (totalL/1000)*(state.price||0.004);
+  const sid = (id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  sid('hist-total-l',    totalL||'—');
+  sid('hist-total-cost', totalL>0?cost.toFixed(2)+'€':'—€');
+  sid('hist-sessions',   state.wateringHistory.length||'—');
+  sid('hist-savings',    totalL>0?(cost*0.3).toFixed(2)+'€':'—€');
+  sid('hist-eco-water',  totalL>0?Math.round(totalL*0.25)+'L':'—L');
+  sid('hist-eco-money',  totalL>0?(cost*0.25).toFixed(2)+'€':'—€');
+  sid('hist-eco-over',   '—€');
 }
 
 // Build a day-indexed value array from real records
@@ -1878,7 +2022,6 @@ function getWaterData(period) {
 }
 
 function getPrecipData(period) {
-  // Precipitation: real Open-Meteo past data stored in state.forecast
   const allTimes  = (state.forecast && state.forecast.time) || [];
   const allPrecip = (state.forecast && state.forecast.precipitation_sum) || [];
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1889,6 +2032,7 @@ function getPrecipData(period) {
       const d = new Date(today); d.setDate(d.getDate()-i);
       const ds = d.toISOString().slice(0,10);
       const idx = allTimes.indexOf(ds);
+      // Aujourd'hui = prévision, passé = données réelles
       values.push(idx !== -1 ? parseFloat((allPrecip[idx]||0).toFixed(1)) : 0);
       labels.push(i===0?'Auj.':i===1?'Hier':'J-'+i);
     }
@@ -1905,14 +2049,18 @@ function getPrecipData(period) {
     }
     return { values, labels, hasData: values.some(v=>v!==null && v>0) };
 
-  } else { // 12m
+  } else { // 12m — utilise precipLocalHistory stocké localement
     const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
     const buckets = new Array(12).fill(0);
     const hasBucket = new Array(12).fill(false);
-    allTimes.forEach((t,i) => {
-      const d = new Date(t+'T12:00:00');
+    const source = state.precipLocalHistory && state.precipLocalHistory.length > 0
+      ? state.precipLocalHistory
+      : allTimes.map((t,i)=>({date:t, mm:allPrecip[i]||0}));
+    source.forEach(({date, mm}) => {
+      if(!date)return;
+      const d = new Date(date+'T12:00:00');
       const ma = (today.getFullYear()-d.getFullYear())*12 + today.getMonth()-d.getMonth();
-      if(ma>=0 && ma<12){ buckets[11-ma]+=allPrecip[i]||0; hasBucket[11-ma]=true; }
+      if(ma>=0 && ma<12){ buckets[11-ma]+= mm||0; hasBucket[11-ma]=true; }
     });
     const values = buckets.map((v,i)=>hasBucket[i]?parseFloat(v.toFixed(1)):null);
     const labels = Array.from({length:12},(_,i)=>{const m=new Date(today);m.setMonth(m.getMonth()-(11-i));return MONTHS[m.getMonth()];});
@@ -1959,38 +2107,8 @@ function renderBarChart(containerId, data, colorActive, colorNormal, unit) {
   el.innerHTML = html;
 }
 
-function renderHistoryTab(){
-  const period = currentHistoryPeriod || '7j';
-  const periodLabels = {'7j':'7 derniers jours','30j':'30 derniers jours','12m':'12 derniers mois'};
+// (renderHistoryTab défini plus haut)
 
-  renderBarChart('history-chart-humidity', getMoistureData(period), 'var(--green-mid)', 'var(--green-pale)', '%');
-  renderBarChart('history-chart-water',    getWaterData(period),   'var(--water)',     'var(--water-light)', 'L');
-
-  const precipData = getPrecipData(period);
-  const titleEl = document.querySelector('#tab-history .big-chart-precip-title');
-  if(titleEl) titleEl.textContent = '🌧️ Précipitations — '+periodLabels[period]+' (mm)';
-  renderBarChart('precip-bars', precipData, 'var(--water)', 'var(--water-light)', 'mm');
-
-  const precipVals = (precipData.values||[]).filter(v=>v!==null&&v>0);
-  const pt = document.getElementById('precip-totals');
-  if(pt) {
-    const total = precipVals.reduce((a,b)=>a+b,0);
-    const max   = precipVals.length ? Math.max(...precipVals) : 0;
-    pt.innerHTML = '<span>Total : <strong style="color:var(--water);">'+total.toFixed(1)+'mm</strong></span>'
-                 + '<span>Max : <strong style="color:var(--water);">'+max.toFixed(1)+'mm</strong></span>';
-  }
-
-  const totalL = state.wateringHistory.reduce((s,e)=>s+(e.liters||0),0);
-  const cost   = (totalL/1000)*(state.price||0.004);
-  const sid = (id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  sid('hist-total-l',    totalL||'—');
-  sid('hist-total-cost', totalL>0?cost.toFixed(2)+'€':'—€');
-  sid('hist-sessions',   state.wateringHistory.length||'—');
-  sid('hist-savings',    totalL>0?(cost*0.3).toFixed(2)+'€':'—€');
-  sid('hist-eco-water',  totalL>0?Math.round(totalL*0.25)+'L':'—L');
-  sid('hist-eco-money',  totalL>0?(cost*0.25).toFixed(2)+'€':'—€');
-  sid('hist-eco-over',   '—€');
-}
 
 // ── ALERTS TAB ────────────────────────────────────────────────────────────────
 function renderAlertsTab(){
@@ -2000,8 +2118,12 @@ function renderAlertsTab(){
     const pct=Math.round(state.plantMoisture[k]||60);const p=PLANT_DB[k];
     if(pct<35)alerts.push({type:'urgent',icon:p.emoji,title:p.name+' assoiffés — '+pct+'%',body:'Le niveau d\'humidité est critique. Arrosage urgent recommandé ce soir.',time:'Maintenant'});
   });
-  if(state.forecast&&state.forecast.precipitation_sum){
-    const rainTomorrow=state.forecast.precipitation_sum[1]||0;
+  if(state.forecast&&state.forecast.precipitation_sum&&state.forecast.time){
+    // Chercher la pluie de demain par date (pas par index fixe)
+    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+    const tomorrowStr=tomorrow.toISOString().slice(0,10);
+    const ti=state.forecast.time.indexOf(tomorrowStr);
+    const rainTomorrow=ti!==-1?(state.forecast.precipitation_sum[ti]||0):0;
     if(rainTomorrow>3)alerts.push({type:'info',icon:'🌧️',title:'Pluie prévue demain',body:rainTomorrow.toFixed(1)+'mm attendus demain. Inutile d\'arroser ce soir !',time:'Prévision J+1'});
     const maxTemp=Math.max(...(state.forecast.temperature_2m_max||[]));
     if(maxTemp>32)alerts.push({type:'warn',icon:'🌡️',title:'Fortes chaleurs prévues',body:'Jusqu\'à '+Math.round(maxTemp)+'°C prévus. Arrosez le soir pour limiter l\'évaporation.',time:'Cette semaine'});
@@ -2199,7 +2321,14 @@ function runSimulation(){
   const vals=[];
   for(let i=0;i<7;i++){
     moisture-=(et*exp/ret)*state.advParams.kc*state.advParams.windFactor;
-    const rain=state.forecast&&state.forecast.precipitation_sum?(state.forecast.precipitation_sum[i]||0):0;
+    // Chercher la pluie prévue par date
+    let rain=0;
+    if(state.forecast&&state.forecast.time){
+      const d=new Date();d.setDate(d.getDate()+i);
+      const ds=d.toISOString().slice(0,10);
+      const fi=state.forecast.time.indexOf(ds);
+      if(fi!==-1)rain=(state.forecast.precipitation_sum[fi]||0);
+    }
     moisture+=rain*5;moisture=Math.min(100,Math.max(5,moisture));vals.push(Math.round(moisture));
   }
   const result=document.getElementById('adv-sim-result');
@@ -2221,7 +2350,7 @@ function logoutAccount(){
 }
 function resetApp(){
   if(confirm('Réinitialiser toutes les données ? Cette action est irréversible.')){
-    state={city:'',lat:null,lon:null,surface:30,soil:'argileux',expose:'soleil',price:4.30,flow:10,autoVolume:80,reminder:'morning',selectedPlants:[],plantMoisture:{},wateringHistory:[],autoSchedules:[],weather:null,forecast:[],precipHistory:[],advParams:{kc:1.0,windFactor:1.0,drain:3,efficiency:75,depth:30},calibration:{offset:0,soilMultiplier:1.0,notes:''},premium:{active:false,type:null,trialStart:null,purchased:false},alertsReceived:0};
+    state={city:'',lat:null,lon:null,surface:30,soil:'argileux',expose:'soleil',price:4.30,flow:10,autoVolume:80,reminder:'morning',selectedPlants:[],plantMoisture:{},wateringHistory:[],autoSchedules:[],weather:null,forecast:[],precipHistory:[],precipLocalHistory:[],advParams:{kc:1.0,windFactor:1.0,drain:3,efficiency:75,depth:30},calibration:{offset:0,soilMultiplier:1.0,notes:''},premium:{active:false,type:null,trialStart:null,purchased:false},alertsReceived:0};
     goTo('landing');
   }
 }
