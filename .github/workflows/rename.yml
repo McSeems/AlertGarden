@@ -1,0 +1,28 @@
+name: Rename HTML to index.html
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Find and rename HTML file to index.html
+        run: |
+          HTML_FILE=$(find . -maxdepth 1 -name "*.html" ! -name "index.html" | head -1)
+          if [ -n "$HTML_FILE" ]; then
+            mv "$HTML_FILE" index.html
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git add index.html
+            git rm --cached "$HTML_FILE" 2>/dev/null || true
+            git commit -m "auto: rename to index.html"
+            git push
+          fi
+
+      - name: Nothing to rename
+        if: success()
+        run: echo "index.html already exists or no HTML file found"
