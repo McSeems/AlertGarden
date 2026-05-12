@@ -286,7 +286,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 /* ── SETTINGS ── */
 #screen-settings{background:var(--cream);}
 .settings-header{padding:52px 20px 16px;background:white;border-bottom:1px solid rgba(0,0,0,0.06);}
-.settings-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:100px;-webkit-overflow-scrolling:touch;}
+.settings-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:100px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .settings-section{background:white;border-radius:var(--radius);margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;}
 .settings-section-title{padding:12px 16px;font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.8px;background:var(--green-mist);}
 .settings-row{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer;transition:background 0.15s;}
@@ -379,6 +379,21 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 .plant-info-input:focus{border-color:var(--green-light);}
 .plant-info-input[type="date"]{color:var(--text-mid);}
 .plant-info-photo-zone{cursor:pointer;}
+
+/* ── FIXED OVERLAY TABS — scroll fix ── */
+#tab-journal,#tab-community,#tab-memory,#tab-history,#tab-alerts,#tab-settings{
+  height:100%;
+  height:100dvh;
+}
+#tab-journal > div[style*="flex:1"],
+#tab-community > div[style*="flex:1"],
+#tab-memory > div[style*="flex:1"],
+#tab-history > div[style*="flex:1"],
+#tab-alerts > div[style*="flex:1"],
+#tab-settings.settings-content{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);display:flex;padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 6px);z-index:100;box-shadow:0 -2px 16px rgba(26,58,42,0.07);gap:2px;}
@@ -1078,6 +1093,8 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
     <div class="nav-item" id="nav-settings" onclick="switchTab('settings',this)"><div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div><div class="nav-label">Réglages</div></div>
   </div>
 
+</div><!-- end screen-app -->
+
 <!-- ══════════════════ SCREEN 5 : PLANT DETAIL ══════════════════ -->
 <div id="screen-plant" class="screen">
   <div class="plant-detail-header">
@@ -1207,7 +1224,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : JOURNAL DE BORD ══════════════════ -->
-<div id="tab-journal" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-journal" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="journal-header">
     <div class="journal-header-top">
       <div class="journal-title">Mon <em>Journal</em></div>
@@ -1229,7 +1246,18 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
         <div class="journal-sum-stat"><div class="journal-sum-val" id="jsv-shared">0</div><div class="journal-sum-sub">partagées</div></div>
       </div>
     </div>
-    <div id="journal-timeline"></div>
+    <!-- Section Notes -->
+    <div id="journal-section-notes">
+      <div id="journal-timeline"></div>
+    </div>
+    <!-- Section Arrosages -->
+    <div id="journal-section-watering" style="display:none;padding:16px;">
+      <div id="journal-watering-list"></div>
+    </div>
+    <!-- Section Bilan -->
+    <div id="journal-section-stats" style="display:none;padding:16px;">
+      <div id="journal-stats-content"></div>
+    </div>
   </div>
   <div class="bottom-nav">
     <div class="nav-item" onclick="switchTab('home',document.getElementById('nav-home'))"><div class="nav-icon-wrap"><div class="nav-icon">🏡</div></div><div class="nav-label">Accueil</div></div>
@@ -1241,7 +1269,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : COMMUNAUTÉ ══════════════════ -->
-<div id="tab-community" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-community" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="com-header">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div class="com-title">Commu<em>nauté</em></div>
@@ -1354,7 +1382,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : MÉMOIRE VIVANTE ══════════════════ -->
-<div id="tab-memory" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-memory" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="memory-header">
     <div class="memory-title-h">Mémoire <em>Vivante</em></div>
   </div>
@@ -1457,7 +1485,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : HISTORY ══════════════════ -->
-<div id="tab-history" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-history" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="history-screen-header"><div class="screen-title">Historique</div></div>
   <div style="flex:1;overflow-y:auto;padding-bottom:80px;">
 
@@ -1527,7 +1555,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : ALERTS ══════════════════ -->
-<div id="tab-alerts" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-alerts" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="alert-header"><div class="screen-title">Alertes & Notifications</div></div>
   <div style="flex:1;overflow-y:auto;padding-bottom:80px;">
     <div class="alert-list" id="alert-list"></div>
@@ -1548,7 +1576,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 </div>
 
 <!-- ══════════════════ TAB : SETTINGS ══════════════════ -->
-<div id="tab-settings" class="hidden" style="position:fixed;inset:0;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
+<div id="tab-settings" class="hidden" style="position:fixed;inset:0;height:100%;background:var(--cream);z-index:50;display:flex;flex-direction:column;">
   <div class="settings-header"><div class="screen-title">Réglages</div></div>
   <div class="settings-content">
 
@@ -1981,10 +2009,10 @@ function isSetupDone() { return !!(state.city && state.selectedPlants && state.s
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────────
 function goTo(id) {
-  // Hide ALL overlay tabs first — plant detail was blocked by journal/memory/etc. overlays
+  // Hide ALL overlay tabs first
   ['tab-history','tab-alerts','tab-settings','tab-journal','tab-community','tab-memory'].forEach(tid => {
     const t = document.getElementById(tid);
-    if(t) { t.classList.add('hidden'); t.style.display=''; }
+    if(t) { t.classList.add('hidden'); }
   });
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('screen-'+id);
@@ -1996,7 +2024,7 @@ function goTo(id) {
 }
 function goBack() { goTo(prevScreen || 'app'); }
 const TAB_IDS = ['history','alerts','settings','journal','community','memory'];
-function hideAllTabs() { TAB_IDS.forEach(t => { const el=document.getElementById('tab-'+t); if(el){el.classList.add('hidden'); el.style.display='';} }); }
+function hideAllTabs() { TAB_IDS.forEach(t => { const el=document.getElementById('tab-'+t); if(el){ el.classList.add('hidden'); } }); }
 // First switchTab removed — the comprehensive one at line ~2985 handles all overlay tabs.
 
 // ── INTRO ────────────────────────────────────────────────────────────────────
@@ -2450,23 +2478,28 @@ function openPlantDetail(key){
 function loadPlantInfoCard(key){
   if(!state.plantInfos) state.plantInfos = {};
   const info = state.plantInfos[key] || {};
-  document.getElementById('pinfo-date').value = info.date||'';
-  document.getElementById('pinfo-count').value = info.count||'';
-  document.getElementById('pinfo-location').value = info.location||'';
-  document.getElementById('pinfo-variety').value = info.variety||'';
-  document.getElementById('pinfo-substrate').value = info.substrate||'';
-  document.getElementById('pinfo-treatment').value = info.treatment||'';
-  document.getElementById('pinfo-notes').value = info.notes||'';
+  const safe = (id, val) => { const el = document.getElementById(id); if(el) el.value = val||''; };
+  safe('pinfo-date', info.date);
+  safe('pinfo-count', info.count);
+  safe('pinfo-location', info.location);
+  safe('pinfo-variety', info.variety);
+  safe('pinfo-substrate', info.substrate);
+  safe('pinfo-treatment', info.treatment);
+  safe('pinfo-notes', info.notes);
   // Photo
   const img = document.getElementById('plant-info-photo-img');
   const ph = document.getElementById('plant-info-photo-placeholder');
-  if(info.photo){img.src=info.photo;img.style.display='block';ph.style.display='none';}
-  else{img.style.display='none';ph.style.display='flex';}
+  if(img && ph){
+    if(info.photo){img.src=info.photo;img.style.display='block';ph.style.display='none';}
+    else{img.style.display='none';ph.style.display='flex';}
+  }
   // Summary
   updatePlantInfoSummary(key);
   // Reset collapsed state
-  document.getElementById('plant-info-body').style.display='none';
-  document.getElementById('plant-info-arrow').style.transform='';
+  const body = document.getElementById('plant-info-body');
+  const arrow = document.getElementById('plant-info-arrow');
+  if(body) body.style.display='none';
+  if(arrow) arrow.style.transform='';
 }
 
 function togglePlantInfoCard(){
@@ -3317,7 +3350,7 @@ function switchTab(tab, el) {
   // Hide all overlay tabs
   ['tab-history','tab-alerts','tab-settings','tab-journal','tab-community','tab-memory'].forEach(id => {
     const t = document.getElementById(id);
-    if (t) { t.classList.add('hidden'); t.style.display = ''; }
+    if (t) { t.classList.add('hidden'); }
   });
 
   // Hide/show FAB
@@ -3456,6 +3489,77 @@ function submitJournalEntry() {
 function setJournalSeg(btn, mode) {
   document.querySelectorAll('.journal-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  // Show/hide sections
+  const sections = { notes:'journal-section-notes', watering:'journal-section-watering', stats:'journal-section-stats' };
+  Object.entries(sections).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = key===mode ? '' : 'none';
+  });
+  if(mode === 'watering') renderJournalWatering();
+  if(mode === 'stats') renderJournalStats();
+}
+
+function renderJournalWatering() {
+  const list = document.getElementById('journal-watering-list');
+  if(!list) return;
+  const history = state.wateringHistory || [];
+  if(history.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-light);font-size:0.9rem;">💧 Aucun arrosage enregistré</div>';
+    return;
+  }
+  list.innerHTML = history.map(e => {
+    const plant = e.plant ? PLANT_DB[e.plant] : null;
+    return `<div style="background:white;border-radius:12px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:22px;">${plant ? plant.emoji : '💧'}</div>
+      <div style="flex:1;">
+        <div style="font-size:0.9rem;font-weight:600;color:var(--text-dark);">${plant ? plant.name : 'Jardin'}</div>
+        <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">${e.date}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.9rem;font-weight:700;color:var(--water);">${e.liters}L</div>
+        <div style="font-size:0.75rem;color:var(--text-light);">${((e.liters/1000)*state.price).toFixed(2)}€</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderJournalStats() {
+  const el = document.getElementById('journal-stats-content');
+  if(!el) return;
+  const history = state.wateringHistory || [];
+  const totalL = history.reduce((s,e) => s+e.liters, 0);
+  const totalCost = (totalL/1000)*state.price;
+  const savings = Math.max(0,(totalL*1.3/1000)*state.price - totalCost);
+  const entries = state.journalEntries || [];
+  const byType = {};
+  entries.forEach(e => { byType[e.type] = (byType[e.type]||0)+1; });
+  const typeLabels = {action:'Actions',note:'Notes',harvest:'Récoltes',problem:'Problèmes',treatment:'Traitements',taille:'Tailles'};
+  const typeEmoji = {action:'✅',note:'📝',harvest:'🌾',problem:'⚠️',treatment:'💊',taille:'✂️'};
+  el.innerHTML = `
+    <div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px;">💧 Bilan arrosages</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div><div style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--water);">${totalL}</div><div style="font-size:0.72rem;color:var(--text-light);">Litres total</div></div>
+        <div><div style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--text-dark);">${totalCost.toFixed(2)}€</div><div style="font-size:0.72rem;color:var(--text-light);">Coût eau</div></div>
+        <div><div style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--ok);">${savings.toFixed(2)}€</div><div style="font-size:0.72rem;color:var(--text-light);">Économies</div></div>
+      </div>
+    </div>
+    <div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px;">📖 Activité journal</div>
+      ${Object.keys(typeLabels).filter(k=>byType[k]).map(k=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--green-mist);">
+          <span style="font-size:0.88rem;color:var(--text-dark);">${typeEmoji[k]} ${typeLabels[k]}</span>
+          <span style="font-weight:700;color:var(--green-mid);">${byType[k]}</span>
+        </div>`).join('')}
+      ${Object.keys(byType).length===0?'<div style="color:var(--text-light);font-size:0.85rem;text-align:center;padding:12px;">Aucune entrée pour l\'instant</div>':''}
+    </div>
+    <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px;">🏆 Points jardin</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-family:'Fraunces',serif;font-size:2.5rem;color:var(--green-mid);">${state.gardenPoints||0}</div>
+        <div style="font-size:0.82rem;color:var(--text-mid);">points accumulés<br><span style="color:var(--text-light);">Arrosages, journal, fiches plantes…</span></div>
+      </div>
+    </div>`;
 }
 function renderJournalTab() {
   const entries = state.journalEntries || [];
