@@ -41,6 +41,9 @@ if('serviceWorker' in navigator){const swBlob=new Blob([SW_CODE],{type:'applicat
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden;}
 
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes bounce{0%{transform:scale(0.3);opacity:0;}50%{transform:scale(1.15);}70%{transform:scale(0.95);}100%{transform:scale(1);opacity:1;}}
+
 .screen{display:none;min-height:100vh;flex-direction:column;}
 .screen.active{display:flex;}
 
@@ -283,7 +286,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 /* ── SETTINGS ── */
 #screen-settings{background:var(--cream);}
 .settings-header{padding:52px 20px 16px;background:white;border-bottom:1px solid rgba(0,0,0,0.06);}
-.settings-content{padding:16px;overflow-y:auto;padding-bottom:80px;flex:1;}
+.settings-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:100px;-webkit-overflow-scrolling:touch;}
 .settings-section{background:white;border-radius:var(--radius);margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;}
 .settings-section-title{padding:12px 16px;font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.8px;background:var(--green-mist);}
 .settings-row{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer;transition:background 0.15s;}
@@ -384,7 +387,8 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 .journal-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .journal-title{font-family:var(--ff-display);font-size:1.6rem;font-weight:400;color:var(--text-dark);letter-spacing:-0.5px;}
 .journal-title em{font-style:italic;color:var(--green-mid);}
-.btn-new-entry{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;background:var(--green-mid);border:none;color:white;font-family:var(--ff-body);font-size:0.82rem;font-weight:600;cursor:pointer;}
+.btn-new-entry{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:24px;background:linear-gradient(135deg,#4a8c5c,var(--green-mid));border:none;color:white;font-family:var(--ff-body);font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(45,92,63,0.35);letter-spacing:0.3px;transition:all 0.2s;}
+.btn-new-entry:active{transform:scale(0.96);box-shadow:0 2px 8px rgba(45,92,63,0.4);}
 .journal-seg{display:flex;background:var(--green-mist);border-radius:10px;padding:3px;}
 .journal-seg-btn{flex:1;padding:7px 0;border-radius:8px;border:none;font-family:var(--ff-body);font-size:0.78rem;font-weight:500;cursor:pointer;color:var(--text-light);background:transparent;transition:all 0.2s;}
 .journal-seg-btn.active{background:white;color:var(--green-deep);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
@@ -429,7 +433,8 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
 .jcard-shared{font-size:0.65rem;color:var(--text-light);margin-left:auto;display:flex;align-items:center;gap:3px;}
 
 /* FAB */
-.fab{position:fixed;bottom:84px;right:16px;height:50px;padding:0 20px;border-radius:25px;background:linear-gradient(135deg,var(--green-mid),var(--green-deep));border:none;cursor:pointer;box-shadow:0 6px 24px rgba(26,58,42,0.45);display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.88rem;font-weight:700;color:white;font-family:var(--ff-body);z-index:40;transition:transform 0.2s,box-shadow 0.2s;letter-spacing:0.2px;}
+.fab{position:fixed;bottom:88px;right:16px;height:54px;padding:0 22px;border-radius:27px;background:linear-gradient(135deg,#4a8c5c,var(--green-deep));border:none;cursor:pointer;box-shadow:0 8px 28px rgba(26,58,42,0.45),0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;gap:9px;font-size:0.9rem;font-weight:700;color:white;font-family:var(--ff-body);z-index:40;transition:transform 0.2s,box-shadow 0.2s;letter-spacing:0.3px;}
+.fab:active{transform:scale(0.95);box-shadow:0 4px 14px rgba(26,58,42,0.5);}
 .fab:active{transform:scale(0.92);}
 
 /* ── Entry sheet ── */
@@ -1042,12 +1047,6 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
       <div class="forecast-row" id="forecast-row"></div>
     </div>
 
-    <!-- Smart watering recommendation -->
-    <div class="section-title">💧 Arrosage du jour</div>
-    <div id="smart-watering-card" style="margin:0 16px 8px;background:white;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);">
-      <div style="color:var(--text-light);font-size:0.85rem;">Calcul en cours…</div>
-    </div>
-
     <!-- Stats -->
     <div class="section-title">Ce mois-ci</div>
     <div class="stats-row">
@@ -1138,7 +1137,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
   <div class="journal-header">
     <div class="journal-header-top">
       <div class="journal-title">Mon <em>Journal</em></div>
-      <button class="btn-new-entry" onclick="openEntrySheet()">+ Entrée</button>
+      <button class="btn-new-entry" onclick="openEntrySheet()">✨ Nouvelle entrée</button>
     </div>
     <div class="journal-seg">
       <button class="journal-seg-btn active" onclick="setJournalSeg(this,'notes')">📖 Mes notes</button>
@@ -1289,14 +1288,15 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
     <!-- Niveau jardin -->
     <div class="garden-level-card">
       <div class="level-orb">
-        <div class="level-num" id="garden-level-num">1</div>
-        <div class="level-word">niveau</div>
+        <div id="level-orb-emoji" style="font-size:2.3rem;line-height:1;margin-bottom:2px;">🌱</div>
+        <div class="level-num" id="garden-level-num" style="font-size:0.85rem;font-weight:700;color:white;">Niv. 1</div>
       </div>
       <div class="level-info">
         <div class="level-name" id="garden-level-name">Jardin Débutant</div>
         <div class="level-sub" id="garden-level-sub">Continuez à jardiner pour progresser</div>
         <div class="level-bar-wrap"><div class="level-bar-fill" id="garden-level-bar" style="width:20%;"></div></div>
         <div class="level-bar-text" id="garden-level-pts">0 / 100 points</div>
+        <div id="level-reward-info"></div>
       </div>
     </div>
     <!-- Timelapse -->
@@ -1358,22 +1358,21 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);m
     <div class="type-btn" onclick="selectEntryType(this,'harvest')"><div class="type-icon">🌾</div><div class="type-label">Récolte</div></div>
     <div class="type-btn" onclick="selectEntryType(this,'treatment')"><div class="type-icon">💊</div><div class="type-label">Traitement</div></div>
     <div class="type-btn" onclick="selectEntryType(this,'taille')"><div class="type-icon">✂️</div><div class="type-label">Taille</div></div>
-    <div class="type-btn" onclick="selectEntryType(this,'photo')"><div class="type-icon">📸</div><div class="type-label">Photo</div></div>
   </div>
   <div class="sheet-section">Plante concernée</div>
   <div class="plant-picker-scroll" id="entry-plant-picker"></div>
   <div class="sheet-section">Note</div>
   <textarea class="entry-textarea" id="entry-text" placeholder="Décrivez ce que vous avez observé, fait ou souhaitez retenir…"></textarea>
-  <!-- Photo upload -->
-  <div style="margin-bottom:12px;">
+  <!-- Photo (optionnelle, pour toutes les entrées) -->
+  <div style="margin-bottom:14px;">
     <label for="entry-photo-input" id="entry-photo-label" style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--green-mist);border-radius:12px;border:2px dashed var(--green-pale);cursor:pointer;">
       <span style="font-size:18px;">📷</span>
-      <span style="font-size:0.85rem;color:var(--green-mid);font-weight:500;">Ajouter une photo</span>
+      <span style="font-size:0.85rem;color:var(--green-mid);font-weight:600;">Ajouter une photo (optionnel)</span>
     </label>
     <input type="file" id="entry-photo-input" accept="image/*" style="display:none;" onchange="handleEntryPhoto(this)">
     <div id="entry-photo-preview" style="display:none;margin-top:8px;position:relative;">
-      <img id="entry-photo-img" style="width:100%;border-radius:10px;max-height:160px;object-fit:cover;" alt="">
-      <button onclick="removeEntryPhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;">✕</button>
+      <img id="entry-photo-img" style="width:100%;border-radius:10px;max-height:170px;object-fit:cover;display:block;" alt="">
+      <button type="button" onclick="removeEntryPhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);color:white;border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;line-height:1;">✕</button>
     </div>
   </div>
   <div class="share-row">
@@ -1908,33 +1907,23 @@ function isSetupDone() { return !!(state.city && state.selectedPlants && state.s
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────────
 function goTo(id) {
-  // Hide ALL overlay tabs before navigating — fixes blank screen on plant detail
+  // Hide ALL overlay tabs first — plant detail was blocked by journal/memory/etc. overlays
   ['tab-history','tab-alerts','tab-settings','tab-journal','tab-community','tab-memory'].forEach(tid => {
-    const t = document.getElementById(tid); if(t) t.classList.add('hidden');
+    const t = document.getElementById(tid);
+    if(t) { t.classList.add('hidden'); t.style.display=''; }
   });
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('screen-'+id);
   if(target) target.classList.add('active');
-  if(id==='app') hideAllTabs();
+  // Hide journal FAB whenever we leave overlay tabs
   const fab = document.getElementById('journal-fab');
   if(fab) fab.style.display = 'none';
   saveState();
 }
 function goBack() { goTo(prevScreen || 'app'); }
-const TAB_IDS = ['history','alerts','settings'];
+const TAB_IDS = ['history','alerts','settings','journal','community','memory'];
 function hideAllTabs() { TAB_IDS.forEach(t => { const el=document.getElementById('tab-'+t); if(el){el.classList.add('hidden'); el.style.display='';} }); }
-function switchTab(tab, el) {
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(el) el.classList.add('active');
-  hideAllTabs();
-  if(tab==='home'){goTo('app');return;}
-  const tabEl = document.getElementById('tab-'+tab);
-  tabEl.classList.remove('hidden');
-  tabEl.style.display='flex';
-  if(tab==='history') renderHistoryTab();
-  if(tab==='alerts')  renderAlertsTab();
-  if(tab==='settings') renderSettingsTab();
-}
+// First switchTab removed — the comprehensive one at line ~2985 handles all overlay tabs.
 
 // ── INTRO ────────────────────────────────────────────────────────────────────
 let introSlide=1;
@@ -2066,7 +2055,8 @@ function togglePlant(el,key){
   const idx=state.selectedPlants.indexOf(key);
   if(idx>-1){state.selectedPlants.splice(idx,1);el.classList.remove('selected');}
   else{
-    if(!isPremium()&&state.selectedPlants.length>=5){openPremiumModal('plants');return;}
+    const freeLimit = 5 + (state.bonusPlantSlots || 0);
+    if(!isPremium()&&state.selectedPlants.length>=freeLimit){openPremiumModal('plants');return;}
     state.selectedPlants.push(key);el.classList.add('selected');
   }
 }
@@ -2089,220 +2079,6 @@ function getRainToday(){
   const idx=state.forecast.time.indexOf(today);
   return idx!==-1?(state.forecast.precipitation_sum[idx]||0):0;
 }
-
-// ── MOTEUR D'ARROSAGE INTELLIGENT ────────────────────────────────────────────
-// Calcule le volume idéal à apporter aujourd'hui pour chaque plante,
-// en tenant compte : ET₀, humidité sol, pluie J et J+1, temp, vent.
-
-function getET0Today() {
-  // ET₀ simplifié Hargreaves-Samani
-  // Nécessite T_max, T_min, et rayonnement extra-terrestre Ra (estimé par mois/latitude)
-  if(!state.forecast || !state.forecast.temperature_2m_max) return 3.5; // fallback
-  const today = new Date().toISOString().slice(0,10);
-  const idx = state.forecast.time ? state.forecast.time.indexOf(today) : -1;
-  const tMax = idx !== -1 ? (state.forecast.temperature_2m_max[idx]||25) : 25;
-  // T_min approximé à T_max - 8°C si non dispo
-  const tMin = tMax - 8;
-  const tMoy = (tMax + tMin) / 2;
-  // Ra estimé selon le mois (Wh/m²/jour converti en équivalent mm/jour)
-  // Valeurs moyennes France latitude ~46°N
-  const RA_BY_MONTH = [5,7,10,13,15,16,15,14,11,8,5,4]; // mm/jour équivalent
-  const month = new Date().getMonth();
-  const Ra = RA_BY_MONTH[month];
-  // Hargreaves : ET₀ = 0.0023 × Ra × (Tmoy + 17.8) × (Tmax - Tmin)^0.5
-  const et0 = 0.0023 * Ra * (tMoy + 17.8) * Math.pow(Math.max(0, tMax - tMin), 0.5);
-  return Math.max(1, Math.round(et0 * 10) / 10);
-}
-
-function getRainTomorrow() {
-  if(!state.forecast || !state.forecast.time) return 0;
-  const d = new Date(); d.setDate(d.getDate() + 1);
-  const ds = d.toISOString().slice(0,10);
-  const idx = state.forecast.time.indexOf(ds);
-  return idx !== -1 ? (state.forecast.precipitation_sum[idx]||0) : 0;
-}
-
-function getTempTomorrow() {
-  if(!state.forecast || !state.forecast.time) return 22;
-  const d = new Date(); d.setDate(d.getDate() + 1);
-  const ds = d.toISOString().slice(0,10);
-  const idx = state.forecast.time.indexOf(ds);
-  return idx !== -1 ? (state.forecast.temperature_2m_max[idx]||22) : 22;
-}
-
-function getWindTomorrow() {
-  // windspeed_10m_max si dispo, sinon utilise current weather
-  if(state.weather && state.weather.windspeed_10m) return state.weather.windspeed_10m;
-  return 10;
-}
-
-// Coefficient cultural moyen des plantes sélectionnées (Kc selon famille)
-const KC_BY_FAMILY = {
-  potager: 1.15, gazon: 1.0, fleurs: 0.85, fruitiers: 0.75, arbustes: 0.65
-};
-function getAvgKc() {
-  if(!state.selectedPlants.length) return 1.0;
-  const kcs = state.selectedPlants.map(k => KC_BY_FAMILY[PLANT_DB[k].family] || 0.9);
-  return kcs.reduce((a,b) => a+b, 0) / kcs.length;
-}
-
-// Calcule le besoin en mm/jour pour UNE plante
-function getPlantDailyNeedMm(key) {
-  const plant = PLANT_DB[key];
-  if(!plant) return 3;
-  const et0 = getET0Today();
-  const kc = KC_BY_FAMILY[plant.family] || 0.9;
-  const expose = EXPOSE_FACTOR[state.expose] || 1.0;
-  // Besoin de base : ET₀ × Kc × facteur exposition
-  return Math.max(0, et0 * kc * expose);
-}
-
-/**
- * Calcule le volume idéal d'arrosage en LITRES pour l'ensemble du jardin.
- * Retourne un objet avec le volume, les facteurs, et une explication lisible.
- */
-function computeIdealWatering() {
-  if(!state.selectedPlants.length || !state.surface) {
-    return { liters: 0, factors: [], confidence: 0, summary: 'Configurez vos plantes d\'abord.' };
-  }
-
-  const et0 = getET0Today();
-  const rainToday = getRainToday();          // mm
-  const rainTomorrow = getRainTomorrow();    // mm prévus J+1
-  const tempTomorrow = getTempTomorrow();    // °C max J+1
-  const windKmh = getWindTomorrow();         // km/h
-  const avgKc = getAvgKc();
-  const soilRet = SOIL_RETENTION[state.soil] || 1.0;
-  const expose = EXPOSE_FACTOR[state.expose] || 1.0;
-
-  // Humidité moyenne sol (pondérée par besoins de chaque plante)
-  const avgMoisture = state.selectedPlants.length > 0
-    ? state.selectedPlants.reduce((s,k) => s + (state.plantMoisture[k]||60), 0) / state.selectedPlants.length
-    : 60;
-
-  // Besoin brut = ET₀ × Kc_moyen × surface (en litres : 1mm sur 1m² = 1 litre)
-  const needBrutMm = et0 * avgKc * expose;
-  let needLiters = needBrutMm * state.surface;
-
-  const factors = [];
-  let confidence = 70; // base
-
-  // ── Facteur 1 : pluie aujourd'hui
-  if(rainToday > 0) {
-    const rainCovered = Math.min(needBrutMm, rainToday * 0.7); // efficacité 70%
-    needLiters -= rainCovered * state.surface;
-    factors.push({ icon:'🌧️', label:`Pluie aujourd'hui : ${rainToday.toFixed(1)}mm`, effect: `-${Math.round(rainCovered*state.surface)}L`, positive: true });
-    confidence += 5;
-  }
-
-  // ── Facteur 2 : pluie demain
-  if(rainTomorrow >= 8) {
-    const reduction = 0.85;
-    needLiters *= (1 - reduction);
-    factors.push({ icon:'🌧️', label:`Forte pluie demain : ${rainTomorrow.toFixed(0)}mm annoncés`, effect:`−85% du besoin`, positive: true });
-  } else if(rainTomorrow >= 3) {
-    const reduction = 0.40;
-    needLiters *= (1 - reduction);
-    factors.push({ icon:'🌦️', label:`Pluie modérée demain : ${rainTomorrow.toFixed(0)}mm annoncés`, effect:`−40% du besoin`, positive: true });
-  } else if(rainTomorrow > 0) {
-    const reduction = 0.15;
-    needLiters *= (1 - reduction);
-    factors.push({ icon:'🌤️', label:`Légère pluie demain : ${rainTomorrow.toFixed(0)}mm`, effect:`−15% du besoin`, positive: true });
-  }
-
-  // ── Facteur 3 : chaleur demain
-  if(tempTomorrow >= 35) {
-    needLiters *= 1.25;
-    factors.push({ icon:'🌡️', label:`Forte chaleur demain : ${Math.round(tempTomorrow)}°C`, effect:`+25% anticipation`, positive: false });
-  } else if(tempTomorrow >= 30) {
-    needLiters *= 1.15;
-    factors.push({ icon:'☀️', label:`Chaleur demain : ${Math.round(tempTomorrow)}°C`, effect:`+15% anticipation`, positive: false });
-  }
-
-  // ── Facteur 4 : vent
-  if(windKmh >= 40) {
-    needLiters *= 1.15;
-    factors.push({ icon:'💨', label:`Vent fort : ${Math.round(windKmh)} km/h`, effect:`+15% (évaporation)`, positive: false });
-  } else if(windKmh >= 25) {
-    needLiters *= 1.08;
-    factors.push({ icon:'🌬️', label:`Vent modéré : ${Math.round(windKmh)} km/h`, effect:`+8% (évaporation)`, positive: false });
-  }
-
-  // ── Facteur 5 : humidité sol actuelle
-  if(avgMoisture >= 70) {
-    needLiters *= 0.5;
-    factors.push({ icon:'💧', label:`Sol déjà humide : ${Math.round(avgMoisture)}%`, effect:`−50% (réserve suffisante)`, positive: true });
-    confidence -= 5;
-  } else if(avgMoisture >= 55) {
-    needLiters *= 0.75;
-    factors.push({ icon:'💧', label:`Sol correctement hydraté : ${Math.round(avgMoisture)}%`, effect:`−25%`, positive: true });
-  } else if(avgMoisture < 30) {
-    needLiters *= 1.20;
-    factors.push({ icon:'⚠️', label:`Sol très sec : ${Math.round(avgMoisture)}%`, effect:`+20% (stress hydrique)`, positive: false });
-    confidence -= 10;
-  }
-
-  // ── Facteur 6 : type de sol (rétention)
-  if(soilRet > 1.1) {
-    needLiters *= 0.9; // sol argileux retient mieux → besoin moindre
-    confidence += 5;
-  } else if(soilRet < 0.8) {
-    needLiters *= 1.1; // sol sableux sèche vite
-  }
-
-  // ── Calibration utilisateur si appliquée
-  if(state.calibration && state.calibration.soilMultiplier !== 1.0) {
-    const mult = 1 / state.calibration.soilMultiplier;
-    needLiters *= Math.min(1.3, Math.max(0.7, mult));
-    confidence += 10;
-  }
-
-  needLiters = Math.max(0, Math.round(needLiters));
-
-  // Confiance selon données dispo
-  if(state.forecast && state.forecast.time && state.forecast.time.length > 3) confidence += 10;
-  if(state.calibration.offset !== 0) confidence += 5;
-  confidence = Math.min(95, Math.max(20, confidence));
-
-  // Résumé en une phrase
-  let summary = '';
-  if(needLiters === 0) summary = 'Pas d\'arrosage nécessaire aujourd\'hui.';
-  else if(rainTomorrow >= 8) summary = `Pluie importante prévue demain — arrosage minimal conseillé.`;
-  else if(tempTomorrow >= 33) summary = `Forte chaleur prévue demain — arrosez ce soir pour anticiper.`;
-  else summary = `Arrosage recommandé ce ${new Date().getHours() < 10 ? 'matin' : 'soir'}.`;
-
-  return {
-    liters: needLiters,
-    et0, rainToday, rainTomorrow, tempTomorrow, windKmh,
-    avgMoisture: Math.round(avgMoisture),
-    avgKc: Math.round(avgKc*100)/100,
-    factors,
-    confidence,
-    summary
-  };
-}
-
-/**
- * Calcule l'écart entre ce qui a été arrosé et ce qui était idéal.
- * Retourne { delta, label, color }
- */
-function computeWateringBalance(actualLiters) {
-  const ideal = computeIdealWatering();
-  const delta = actualLiters - ideal.liters;
-  if(Math.abs(delta) < 5) return { delta:0, label:'✅ Arrosage idéal !', color:'var(--ok)', ideal };
-  if(delta > 0) return {
-    delta, ideal,
-    label:`+${delta}L sur-arrosage (idéal : ${ideal.liters}L)`,
-    color:'var(--warn)'
-  };
-  return {
-    delta, ideal,
-    label:`${delta}L sous-arrosage (idéal : ${ideal.liters}L)`,
-    color:'var(--water)'
-  };
-}
-
-// ── FIN MOTEUR ────────────────────────────────────────────────────────────────
 
 // Simulation prochain arrosage sur 14 jours avec les pluies prévues
 function daysUntilWatering(key){
@@ -2540,61 +2316,13 @@ function renderForecast(){
     row.appendChild(card);
   }
 }
-function renderSmartWateringCard() {
-  const card = document.getElementById('smart-watering-card');
-  if(!card || !state.selectedPlants.length) return;
-  const w = computeIdealWatering();
-  const confColor = w.confidence >= 75 ? 'var(--ok)' : w.confidence >= 50 ? 'var(--warn)' : 'var(--danger)';
-  const confLabel = w.confidence >= 75 ? 'Bonne précision' : w.confidence >= 50 ? 'Précision correcte' : 'Données limitées';
-
-  let factorsHtml = w.factors.map(f =>
-    `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--green-mist);">
-      <span style="font-size:15px;flex-shrink:0;">${f.icon}</span>
-      <span style="flex:1;font-size:0.8rem;color:var(--text-mid);">${f.label}</span>
-      <span style="font-size:0.78rem;font-weight:600;color:${f.positive?'var(--ok)':'var(--warn)'};">${f.effect}</span>
-    </div>`
-  ).join('');
-
-  if(!factorsHtml) factorsHtml = `<div style="font-size:0.8rem;color:var(--text-light);padding:4px 0;">Données météo en cours de chargement…</div>`;
-
-  card.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div>
-        <div style="font-family:var(--ff-serif);font-size:2rem;font-weight:400;color:var(--green-deep);">
-          ${w.liters > 0 ? w.liters+'<span style="font-size:1rem;color:var(--text-light);">L</span>' : '—'}
-        </div>
-        <div style="font-size:0.82rem;color:var(--text-mid);margin-top:2px;">${w.summary}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:0.72rem;font-weight:700;color:${confColor};background:${confColor}22;padding:4px 10px;border-radius:20px;">${confLabel}</div>
-        <div style="font-size:0.7rem;color:var(--text-light);margin-top:4px;">${w.confidence}% confiance</div>
-      </div>
-    </div>
-    <div style="background:var(--green-mist);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
-      <div style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Facteurs pris en compte</div>
-      ${factorsHtml}
-      <div style="display:flex;gap:12px;margin-top:8px;font-size:0.78rem;color:var(--text-mid);">
-        <span>ET₀ : <strong>${w.et0}mm/j</strong></span>
-        <span>Kc moy. : <strong>${w.avgKc}</strong></span>
-        <span>Humidité : <strong>${w.avgMoisture}%</strong></span>
-      </div>
-    </div>
-    <div style="font-size:0.72rem;color:var(--text-light);line-height:1.5;font-style:italic;">
-      ℹ️ Estimation basée sur ET₀ Hargreaves-Samani, météo temps réel et type de sol. L'écart réel peut varier selon la densité et le paillage.
-    </div>
-  `;
-}
-
 function updateStats(){
   const totalL=state.wateringHistory.reduce((s,e)=>s+e.liters,0);
   const cost=(totalL/1000)*state.price;
-  // Economies : comparaison avec besoin théorique total cumulé vs arrosage réel
-  // On soustrait le surplus au coût (si arrosage > besoin → surcout, sinon économie)
-  const savingsCost = Math.max(0, (totalL*0.25/1000)*state.price);
+  const savings=Math.max(0,(totalL*1.3/1000)*state.price-cost);
   document.getElementById('stat-liters').textContent=totalL>0?totalL+'L':'—';
   document.getElementById('stat-cost').textContent=totalL>0?cost.toFixed(2)+'€':'—€';
-  document.getElementById('stat-savings').textContent=totalL>0?savingsCost.toFixed(2)+'€':'—€';
-  renderSmartWateringCard();
+  document.getElementById('stat-savings').textContent=totalL>0?savings.toFixed(2)+'€':'—€';
 }
 
 // ── PLANT DETAIL ─────────────────────────────────────────────────────────────
@@ -2666,35 +2394,15 @@ function confirmWatering(){
   else if(activeTab.includes('litres')){liters=parseFloat(document.getElementById('w-liters').value)||0;}
   else{liters=state.autoVolume;}
   if(liters<=0){alert('Veuillez entrer un volume.');return;}
-
-  // Calcule le bilan vs volume idéal AVANT d'enregistrer
-  const balance = computeWateringBalance(Math.round(liters));
-
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
-  state.wateringHistory.unshift({
-    date:dateStr,
-    liters:Math.round(liters),
-    plant:currentPlant,
-    ts: now.toISOString(),
-    idealLiters: balance.ideal.liters,
-    delta: balance.delta,
-  });
+  const now=new Date();const dateStr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  state.wateringHistory.unshift({date:dateStr,liters:Math.round(liters),plant:currentPlant});
   const targets=currentPlant?[currentPlant]:state.selectedPlants;
   targets.forEach(k=>{state.plantMoisture[k]=Math.min(100,(state.plantMoisture[k]||60)+liters/state.surface*8);});
   document.getElementById('modal-watering').classList.remove('open');
-
-  // Toast avec bilan
-  let toastMsg = '✅ Arrosage de '+Math.round(liters)+'L enregistré !';
-  if(balance.delta > 5) toastMsg += ' (+'+balance.delta+'L vs idéal)';
-  else if(balance.delta < -5) toastMsg += ' ('+balance.delta+'L vs idéal)';
-  else if(balance.ideal.liters > 0) toastMsg += ' · Parfait !';
-  showToast(toastMsg);
-
+  showToast('✅ Arrosage de '+Math.round(liters)+'L enregistré !');
   chronoSecs=0;chronoRunning=false;clearInterval(chronoInterval);
   document.getElementById('chrono-display').textContent='00:00';
   updateHeroScore();renderPlantStrip();updateStats();
-  saveState();
   if(currentPlant)openPlantDetail(currentPlant);
 }
 function showToast(msg){const t=document.getElementById('success-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
@@ -2972,20 +2680,37 @@ function renderSettingsTab(){
     block.innerHTML=`<div class="premium-active-card"><div class="premium-active-icon">✨</div><div class="premium-active-text"><div class="title">Premium actif — Merci !</div><div class="sub">Achat unique · Accès à vie à toutes les fonctionnalités</div></div></div>`;
     document.getElementById('plants-badge').className='premium-badge';
     document.getElementById('plants-badge').textContent='Premium illimité';
-  } else if(state.premium.type==='trial'){
-    const days=trialDaysLeft();
-    if(days>0){
-      block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;">
-        <div class="premium-banner-title">✨ Essai Premium — ${days} jours restants</div>
-        <div class="premium-banner-body">Profitez de toutes les fonctionnalités. Activez Premium à vie pour 9,99€.</div>
-        <button class="btn-premium-buy" onclick="openPremiumModal('settings')">Activer Premium — 9,99€</button>
-        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-align:center;margin-top:8px;">Achat unique · Sans abonnement</div>
-      </div>`;
-    } else {
-      block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;"><div class="premium-banner-title">Essai terminé</div><div class="premium-banner-body">Votre essai de 30 jours est terminé. Activez Premium pour continuer.</div><button class="btn-premium-buy" onclick="openPremiumModal('settings')">Activer Premium — 9,99€</button></div>`;
-    }
   } else {
-    block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;">
+    // Free / trial : show 5 + bonus
+    const bonus = state.bonusPlantSlots || 0;
+    const limit = 5 + bonus;
+    const used  = state.selectedPlants.length;
+    const badge = document.getElementById('plants-badge');
+    if(badge) {
+      if(bonus > 0) {
+        badge.className = 'free-badge';
+        badge.textContent = `Gratuit ${used}/${limit} · +${bonus} bonus 🎁`;
+        badge.style.background = 'linear-gradient(135deg,#fef9e7,#fde9a0)';
+        badge.style.color = '#8b5e08';
+      } else {
+        badge.className = 'free-badge';
+        badge.textContent = `Gratuit ${used}/5`;
+      }
+    }
+    if(state.premium.type==='trial'){
+      const days=trialDaysLeft();
+      if(days>0){
+        block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;">
+          <div class="premium-banner-title">✨ Essai Premium — ${days} jours restants</div>
+          <div class="premium-banner-body">Profitez de toutes les fonctionnalités. Activez Premium à vie pour 9,99€.</div>
+          <button class="btn-premium-buy" onclick="openPremiumModal('settings')">Activer Premium — 9,99€</button>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-align:center;margin-top:8px;">Achat unique · Sans abonnement</div>
+        </div>`;
+      } else {
+        block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;"><div class="premium-banner-title">Essai terminé</div><div class="premium-banner-body">Votre essai de 30 jours est terminé. Activez Premium pour continuer.</div><button class="btn-premium-buy" onclick="openPremiumModal('settings')">Activer Premium — 9,99€</button></div>`;
+      }
+    } else {
+      block.innerHTML=`<div class="premium-banner-card" style="margin-bottom:12px;">
       <div class="premium-banner-title">✨ Passer à Premium</div>
       <div class="premium-banner-body">60+ plantes, zones multiples, alertes intelligentes, historique 12 mois.</div>
       <div class="premium-features" style="margin-bottom:14px;">
@@ -2996,7 +2721,9 @@ function renderSettingsTab(){
       </div>
       <button class="btn-premium-buy" onclick="openPremiumModal('settings')">Acheter — 9,99€ (achat unique)</button>
       <button class="btn-trial" onclick="startTrial()">🎁 Essayer 30 jours gratuits</button>
+
     </div>`;
+    }
   }
   // Account section
   const accountBlock = document.getElementById('settings-account-block');
@@ -3265,7 +2992,6 @@ const ENTRY_TYPES = {
   harvest:   { label:'Récolte',   icon:'🌾', color:'#e8f8e8', text:'#2a7a2a' },
   treatment: { label:'Traitement',icon:'💊', color:'#e8f0fe', text:'#5060c0' },
   taille:    { label:'Taille',    icon:'✂️', color:'#f0e8ff', text:'#7040b0' },
-  photo:     { label:'Photo',     icon:'📸', color:'#fff0e8', text:'#c07030' },
 };
 
 const ALL_BADGES = [
@@ -3280,34 +3006,64 @@ const ALL_BADGES = [
 ];
 
 const GARDEN_LEVELS = [
-  { min:0,   max:100,  name:'Jardin Débutant',  emoji:'🌱' },
-  { min:100, max:250,  name:'Jardin Apprenti',  emoji:'🌿' },
-  { min:250, max:500,  name:'Jardin Confirmé',  emoji:'🍃' },
-  { min:500, max:900,  name:'Jardin Expert',    emoji:'🌳' },
-  { min:900, max:9999, name:'Jardin Maître',    emoji:'🏡' },
+  { min:0,   max:100,  name:'Jardin Débutant',  emoji:'🌱', reward: null },
+  { min:100, max:250,  name:'Jardin Apprenti',  emoji:'🌿', reward: { plants:1, msg:'+1 emplacement plante gratuit' } },
+  { min:250, max:500,  name:'Jardin Confirmé',  emoji:'🍃', reward: { plants:1, msg:'+1 emplacement plante gratuit' } },
+  { min:500, max:900,  name:'Jardin Expert',    emoji:'🌳', reward: { plants:2, msg:'+2 emplacements plantes gratuits' } },
+  { min:900, max:9999, name:'Jardin Maître',    emoji:'🏡', reward: { plants:3, msg:'+3 emplacements plantes gratuits' } },
 ];
+
+// Returns the current level index based on points
+function getLevelIdx(pts) {
+  for(let i=GARDEN_LEVELS.length-1;i>=0;i--){ if(pts>=GARDEN_LEVELS[i].min) return i; }
+  return 0;
+}
+
+/**
+ * Compares previous level to current level and awards bonus plant slots if user leveled up.
+ * Must be called AFTER state.gardenPoints is incremented.
+ */
+function checkLevelUp(prevPoints) {
+  const prevIdx = getLevelIdx(prevPoints);
+  const newIdx  = getLevelIdx(state.gardenPoints || 0);
+  if(newIdx <= prevIdx) return; // pas de level-up
+
+  for(let i = prevIdx + 1; i <= newIdx; i++) {
+    const lvl = GARDEN_LEVELS[i];
+    if(lvl.reward && lvl.reward.plants) {
+      state.bonusPlantSlots = (state.bonusPlantSlots || 0) + lvl.reward.plants;
+    }
+    // Notification visuelle après un court délai (pour ne pas écraser le toast de l'entrée)
+    setTimeout(() => {
+      showLevelUpModal(i, lvl);
+    }, 600 + (i - prevIdx - 1) * 400);
+  }
+  saveState();
+}
+
+function showLevelUpModal(idx, lvl) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,#fef9e7,#fde9a0);border-radius:24px;padding:30px 26px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);border:3px solid #f0c840;">
+      <div style="font-size:5rem;margin-bottom:12px;animation:bounce 0.8s ease;">${lvl.emoji}</div>
+      <div style="font-family:var(--ff-display);font-size:0.85rem;color:#8b5e08;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">🎉 Niveau ${idx+1} débloqué</div>
+      <div style="font-family:var(--ff-serif);font-size:1.7rem;color:var(--green-deep);font-weight:600;margin-bottom:14px;">${lvl.name}</div>
+      ${lvl.reward ? `
+        <div style="background:white;border-radius:14px;padding:14px 16px;margin:18px 0;border:2px dashed #f0c840;">
+          <div style="font-size:0.72rem;font-weight:700;color:#8b5e08;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🎁 Votre récompense</div>
+          <div style="font-size:1.05rem;color:var(--text-dark);font-weight:700;">${lvl.reward.msg}</div>
+          <div style="font-size:0.78rem;color:var(--text-mid);margin-top:6px;">Vous pouvez désormais suivre ${5 + (state.bonusPlantSlots||0)} plantes en gratuit</div>
+        </div>` : ''}
+      <button onclick="this.closest('div').parentElement.remove()" style="margin-top:8px;width:100%;padding:14px;background:var(--green-mid);color:white;border:none;border-radius:14px;font-family:var(--ff-body);font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.3px;">Magnifique ! ✨</button>
+    </div>`;
+  document.body.appendChild(modal);
+  // Auto-dismiss after 8s if user doesn't tap
+  setTimeout(() => { if(modal.parentNode) modal.remove(); }, 8000);
+}
 
 let currentEntryType = 'action';
 let entryShareOn = false;
-let _entryPhotoData = null;
-
-function handleEntryPhoto(input) {
-  const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    _entryPhotoData = e.target.result;
-    document.getElementById('entry-photo-img').src = _entryPhotoData;
-    document.getElementById('entry-photo-preview').style.display = 'block';
-    document.getElementById('entry-photo-label').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-function removeEntryPhoto() {
-  _entryPhotoData = null;
-  document.getElementById('entry-photo-preview').style.display = 'none';
-  document.getElementById('entry-photo-label').style.display = 'flex';
-  document.getElementById('entry-photo-input').value = '';
-}
 
 // ── TAB SWITCHING (extended for new tabs) ─────────────────────────────────────
 function switchTab(tab, el) {
@@ -3318,40 +3074,85 @@ function switchTab(tab, el) {
   // Hide all overlay tabs
   ['tab-history','tab-alerts','tab-settings','tab-journal','tab-community','tab-memory'].forEach(id => {
     const t = document.getElementById(id);
-    if (t) t.classList.add('hidden');
+    if (t) { t.classList.add('hidden'); t.style.display = ''; }
   });
 
   // Hide/show FAB
   const fab = document.getElementById('journal-fab');
+  if(fab) fab.style.display = 'none';
+
+  // Make sure screen-app is showing (the overlay tabs sit ON TOP of screen-app)
+  if(tab === 'home') {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const appScreen = document.getElementById('screen-app');
+    if(appScreen) appScreen.classList.add('active');
+    saveState();
+    return;
+  }
+
+  // Ensure screen-app is the background under overlay tabs
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const appScreen = document.getElementById('screen-app');
+  if(appScreen) appScreen.classList.add('active');
 
   const tabMap = {
-    home: () => { if(fab)fab.style.display='none'; },
-    history: () => { document.getElementById('tab-history').classList.remove('hidden'); renderHistoryTab(); if(fab)fab.style.display='none'; },
-    alerts: () => { document.getElementById('tab-alerts').classList.remove('hidden'); renderAlertsTab(); if(fab)fab.style.display='none'; },
-    settings: () => { document.getElementById('tab-settings').classList.remove('hidden'); renderSettingsTab(); if(fab)fab.style.display='none'; },
-    journal: () => { document.getElementById('tab-journal').classList.remove('hidden'); renderJournalTab(); if(fab)fab.style.display='flex'; },
+    history: () => { document.getElementById('tab-history').classList.remove('hidden'); renderHistoryTab(); },
+    alerts: () => { document.getElementById('tab-alerts').classList.remove('hidden'); renderAlertsTab(); },
+    settings: () => { document.getElementById('tab-settings').classList.remove('hidden'); renderSettingsTab(); },
+    journal: () => { document.getElementById('tab-journal').classList.remove('hidden'); renderJournalTab(); if(fab) fab.style.display='flex'; },
     community: () => {
       document.getElementById('tab-community').classList.remove('hidden');
-      document.getElementById('com-badge').style.display='none';
-      if(fab)fab.style.display='none';
+      const cb = document.getElementById('com-badge'); if(cb) cb.style.display='none';
     },
-    memory: () => { document.getElementById('tab-memory').classList.remove('hidden'); renderMemoryTab(); if(fab)fab.style.display='none'; },
+    memory: () => { document.getElementById('tab-memory').classList.remove('hidden'); renderMemoryTab(); },
   };
   if (tabMap[tab]) tabMap[tab]();
 }
 
 // ── JOURNAL FUNCTIONS ─────────────────────────────────────────────────────────
+let _entryPhotoData = null;
+
+function handleEntryPhoto(input) {
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _entryPhotoData = e.target.result;
+    const img = document.getElementById('entry-photo-img');
+    const prev = document.getElementById('entry-photo-preview');
+    const lbl = document.getElementById('entry-photo-label');
+    if(img) img.src = _entryPhotoData;
+    if(prev) prev.style.display = 'block';
+    if(lbl) lbl.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function removeEntryPhoto() {
+  _entryPhotoData = null;
+  const prev = document.getElementById('entry-photo-preview');
+  const lbl = document.getElementById('entry-photo-label');
+  const inp = document.getElementById('entry-photo-input');
+  if(prev) prev.style.display = 'none';
+  if(lbl) lbl.style.display = 'flex';
+  if(inp) inp.value = '';
+}
+
 function openEntrySheet() {
   _entryPhotoData = null;
   document.getElementById('entry-overlay').classList.add('open');
   document.getElementById('entry-sheet').classList.add('open');
   // Reset photo UI
   const prev = document.getElementById('entry-photo-preview');
-  const lbl  = document.getElementById('entry-photo-label');
-  const inp  = document.getElementById('entry-photo-input');
+  const lbl = document.getElementById('entry-photo-label');
+  const inp = document.getElementById('entry-photo-input');
   if(prev) prev.style.display = 'none';
-  if(lbl)  lbl.style.display  = 'flex';
-  if(inp)  inp.value = '';
+  if(lbl) lbl.style.display = 'flex';
+  if(inp) inp.value = '';
+  // Reset to default type
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  const firstBtn = document.querySelector('.type-btn');
+  if(firstBtn) firstBtn.classList.add('selected');
+  currentEntryType = 'action';
   // Populate plant picker
   const picker = document.getElementById('entry-plant-picker');
   picker.innerHTML = state.selectedPlants.map((k,i) => {
@@ -3395,63 +3196,49 @@ function submitJournalEntry() {
     photo: _entryPhotoData || null,
   };
   state.journalEntries.unshift(entry);
-  // Add garden points
-  const pts = { action:5, note:3, harvest:10, problem:4, treatment:6, photo:8, taille:7 };
-  state.gardenPoints = (state.gardenPoints||0) + (pts[currentEntryType]||5);
+  // Add garden points + bonus for photo
+  const pts = { action:5, note:3, harvest:10, problem:4, treatment:6, taille:7 };
+  const prevPoints = state.gardenPoints || 0;
+  let earnedPts = pts[currentEntryType] || 5;
+  if(entry.photo) earnedPts += 3; // bonus photo
+  state.gardenPoints = prevPoints + earnedPts;
   saveState();
   closeEntrySheet();
-  showToast('✅ Entrée ajoutée au journal !');
+  showToast('✅ Entrée ajoutée au journal ! +' + earnedPts + ' pts');
   checkBadges();
+  checkLevelUp(prevPoints); // 🎁 Niveau atteint ?
   renderJournalTab();
   if (document.getElementById('tab-memory') && !document.getElementById('tab-memory').classList.contains('hidden')) renderMemoryTab();
 }
 function setJournalSeg(btn, mode) {
   document.querySelectorAll('.journal-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderJournalContent(mode);
 }
-
-function renderJournalContent(mode) {
-  if(mode === 'watering') { renderJournalWatering(); return; }
-  if(mode === 'stats')    { renderJournalBilan();    return; }
-  renderJournalNotes();
-}
-
 function renderJournalTab() {
-  const activeBtn = document.querySelector('.journal-seg-btn.active');
-  const mode = activeBtn
-    ? (activeBtn.textContent.includes('Arrosage')?'watering': activeBtn.textContent.includes('Bilan')?'stats':'notes')
-    : 'notes';
-
-  // Update monthly summary stats
   const entries = state.journalEntries || [];
   const thisMonth = entries.filter(e => {
-    const d = new Date(e.ts || Date.now()); const now = new Date();
-    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    const d = new Date(e.ts || Date.now());
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
   const sid = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  sid('jsv-entries',  thisMonth.length);
-  sid('jsv-harvest',  thisMonth.filter(e=>e.type==='harvest').length);
+  sid('jsv-entries', thisMonth.length);
+  sid('jsv-harvest', thisMonth.filter(e=>e.type==='harvest').length);
   sid('jsv-problems', thisMonth.filter(e=>e.type==='problem').length);
-  sid('jsv-shared',   thisMonth.filter(e=>e.shared).length);
+  sid('jsv-shared', thisMonth.filter(e=>e.shared).length);
 
-  renderJournalContent(mode);
-}
-
-function renderJournalNotes() {
-  const entries = state.journalEntries || [];
   const timeline = document.getElementById('journal-timeline');
-  if(!timeline) return;
-  if(!entries.length) {
-    timeline.innerHTML = `<div style="text-align:center;padding:40px 24px;">
-      <div style="font-size:3rem;margin-bottom:12px;">📖</div>
-      <div style="font-family:var(--ff-display);font-style:italic;font-size:1.1rem;color:var(--text-mid);margin-bottom:8px;">Votre journal est vide</div>
-      <div style="font-size:0.85rem;color:var(--text-light);">Appuyez sur le bouton pour ajouter votre première entrée</div>
+  if (!entries.length) {
+    timeline.innerHTML = `<div style="text-align:center;padding:50px 24px;color:var(--text-light);">
+      <div style="font-size:3.5rem;margin-bottom:14px;">📖</div>
+      <div style="font-family:var(--ff-display);font-style:italic;font-size:1.15rem;color:var(--text-mid);margin-bottom:10px;">Votre journal est vide</div>
+      <div style="font-size:0.88rem;line-height:1.5;max-width:260px;margin:0 auto;">Notez vos observations, récoltes, problèmes et tailles. Ajoutez des photos pour créer la mémoire vivante de votre jardin.</div>
     </div>`;
     return;
   }
+
   let html = '<div class="journal-month">Récent</div>';
-  entries.slice(0,30).forEach((e,i) => {
+  entries.slice(0, 20).forEach((e, i) => {
     const t = ENTRY_TYPES[e.type] || ENTRY_TYPES.note;
     html += `<div class="journal-entry" style="animation-delay:${i*0.04}s">
       <div class="journal-line">
@@ -3460,202 +3247,24 @@ function renderJournalNotes() {
       </div>
       <div class="journal-card">
         <div class="jcard-top">
-          <div class="jcard-plant"><div>
-            <div class="jcard-plant-name">${e.plant}</div>
-            <div class="jcard-time">${e.date||''} · ${e.time||''}</div>
-          </div></div>
+          <div class="jcard-plant">
+            <div>
+              <div class="jcard-plant-name">${e.plant}</div>
+              <div class="jcard-time">${e.date || ''} · ${e.time || ''}</div>
+            </div>
+          </div>
           <span class="jcard-tag ${e.type}" style="background:${t.color};color:${t.text};">${t.label}</span>
         </div>
         <div class="jcard-text">${e.text}</div>
-        ${e.photo ? `<img src="${e.photo}" style="width:100%;border-radius:8px;margin-top:8px;max-height:150px;object-fit:cover;">` : ''}
-        <div class="jcard-chips">${e.shared ? '<span class="jcard-chip">🌍 Partagée</span><span class="jcard-shared">❤️ Communauté</span>' : ''}</div>
-      </div>
-    </div>`;
-  });
-  timeline.innerHTML = html;
-}
-
-function renderJournalWatering() {
-  const timeline = document.getElementById('journal-timeline');
-  if(!timeline) return;
-  const history = state.wateringHistory || [];
-  if(!history.length) {
-    timeline.innerHTML = `<div style="text-align:center;padding:40px 24px;">
-      <div style="font-size:3rem;margin-bottom:12px;">💧</div>
-      <div style="font-family:var(--ff-display);font-style:italic;font-size:1.1rem;color:var(--text-mid);margin-bottom:8px;">Aucun arrosage enregistré</div>
-      <div style="font-size:0.85rem;color:var(--text-light);">Enregistrez un arrosage depuis l'accueil pour voir le bilan ici</div>
-    </div>`;
-    return;
-  }
-  const totalL   = history.reduce((s,e)=>s+(e.liters||0),0);
-  const totalCost= (totalL/1000)*(state.price||4.30);
-  // Surplus/deficit cumulé sur tous les arrosages
-  const totalDelta = history.reduce((s,e)=>s+(e.delta||0),0);
-  const deltaCost  = (Math.abs(totalDelta)/1000)*(state.price||4.30);
-  const overwater  = history.filter(e=>(e.delta||0)>5).length;
-  const underwater = history.filter(e=>(e.delta||0)<-5).length;
-  const perfect    = history.length - overwater - underwater;
-
-  let html = `<div style="margin:0 16px 16px;">
-    <div style="background:linear-gradient(135deg,#e8f5ec,#d0edda);border-radius:var(--radius);padding:16px;border:1px solid var(--green-pale);margin-bottom:12px;">
-      <div style="font-size:0.78rem;font-weight:700;color:var(--green-deep);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">📊 Bilan global arrosages</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-        <div style="text-align:center;background:white;border-radius:10px;padding:10px 6px;">
-          <div style="font-family:var(--ff-serif);font-size:1.3rem;color:var(--green-deep);font-weight:600;">${totalL}L</div>
-          <div style="font-size:0.7rem;color:var(--text-mid);">Total arrosé</div>
-        </div>
-        <div style="text-align:center;background:white;border-radius:10px;padding:10px 6px;">
-          <div style="font-family:var(--ff-serif);font-size:1.3rem;color:var(--text-dark);font-weight:600;">${totalCost.toFixed(2)}€</div>
-          <div style="font-size:0.7rem;color:var(--text-mid);">Coût eau</div>
-        </div>
-        <div style="text-align:center;background:white;border-radius:10px;padding:10px 6px;">
-          <div style="font-family:var(--ff-serif);font-size:1.3rem;color:${totalDelta>0?'var(--warn)':'var(--water)'};font-weight:600;">${totalDelta>0?'+':''}${totalDelta}L</div>
-          <div style="font-size:0.7rem;color:var(--text-mid);">${totalDelta>0?'Excédent':'Déficit'} cumulé</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:0.78rem;text-align:center;">
-        <div style="background:var(--ok);color:white;border-radius:8px;padding:6px 4px;"><strong>${perfect}</strong><br>Parfaits</div>
-        <div style="background:var(--warn);color:white;border-radius:8px;padding:6px 4px;"><strong>${overwater}</strong><br>Sur-arrosés</div>
-        <div style="background:var(--water);color:white;border-radius:8px;padding:6px 4px;"><strong>${underwater}</strong><br>Sous-arrosés</div>
-      </div>
-    </div>`;
-
-  history.slice(0,30).forEach(e => {
-    const cost = ((e.liters||0)/1000)*(state.price||4.30);
-    const hasIdeal = e.idealLiters !== undefined;
-    const delta = e.delta || 0;
-    const deltaCol = Math.abs(delta)<5 ? 'var(--ok)' : delta>0 ? 'var(--warn)' : 'var(--water)';
-    const deltaLabel = Math.abs(delta)<5 ? '✅ Idéal' : delta>0 ? `+${delta}L excédent` : `${delta}L déficit`;
-    html += `<div style="background:white;border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:36px;height:36px;background:#e8f4fd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💧</div>
-        <div style="flex:1;">
-          <div style="font-size:0.9rem;font-weight:600;color:var(--text-dark);">${e.liters||0}L arrosés</div>
-          <div style="font-size:0.75rem;color:var(--text-light);">${e.date||'—'}${e.plant?'· '+e.plant:''}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark);">${cost.toFixed(2)}€</div>
-          ${hasIdeal ? `<div style="font-size:0.72rem;font-weight:600;color:${deltaCol};">${deltaLabel}</div>
-          <div style="font-size:0.68rem;color:var(--text-light);">idéal: ${e.idealLiters}L</div>` : ''}
+        ${e.photo ? `<img src="${e.photo}" style="width:100%;border-radius:8px;margin-top:8px;max-height:180px;object-fit:cover;display:block;" alt="Photo">` : ''}
+        <div class="jcard-chips">
+          ${e.shared ? '<span class="jcard-chip">🌍 Partagée</span>' : ''}
+          <span class="jcard-shared">${e.shared ? '❤️ Communauté' : ''}</span>
         </div>
       </div>
     </div>`;
   });
-  html += '</div>';
   timeline.innerHTML = html;
-}
-
-function renderJournalBilan() {
-  const timeline = document.getElementById('journal-timeline');
-  if(!timeline) return;
-
-  // Météo context
-  const w = computeIdealWatering();
-  const waterH = state.wateringHistory || [];
-  const totalL = waterH.reduce((s,e)=>s+(e.liters||0),0);
-  const cost = (totalL/1000)*(state.price||4.30);
-
-  // Calcul économies réelles : somme des déficits évités = sur-arrosages évités
-  const totalDelta = waterH.reduce((s,e)=>s+(e.delta||0), 0);
-  const surplus   = waterH.reduce((s,e)=>s+Math.max(0,e.delta||0), 0); // total sur-arrosé
-  const surplusCost = (surplus/1000)*(state.price||4.30);
-  // Si l'utilisateur avait arrosé sans guidage (hypothèse +33%), il aurait dépensé plus
-  const naiveCost = (totalL*1.33/1000)*(state.price||4.30);
-  const saving = Math.max(0, naiveCost - cost - surplusCost);
-
-  // Précipitations 7j
-  const allT=(state.forecast&&state.forecast.time)||[];
-  const allP=(state.forecast&&state.forecast.precipitation_sum)||[];
-  const precip7=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-i);
-    const idx=allT.indexOf(d.toISOString().slice(0,10));
-    precip7.push(idx!==-1?(allP[idx]||0):0);
-  }
-  const maxP=Math.max(...precip7,1);
-
-  // Humidité par plante (jauge)
-  const plantBars = state.selectedPlants.map(k => {
-    const p = PLANT_DB[k]; const pct = Math.round(state.plantMoisture[k]||60);
-    const col = pct<35?'var(--danger)':pct<60?'var(--warn)':'var(--ok)';
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <span style="font-size:15px;">${p.emoji}</span>
-      <span style="font-size:0.78rem;color:var(--text-mid);width:70px;flex-shrink:0;">${p.name}</span>
-      <div style="flex:1;height:8px;background:var(--green-mist);border-radius:4px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:${col};border-radius:4px;transition:width 0.5s;"></div>
-      </div>
-      <span style="font-size:0.78rem;font-weight:600;color:${col};width:32px;text-align:right;">${pct}%</span>
-    </div>`;
-  }).join('');
-
-  timeline.innerHTML = `<div style="padding:0 16px;">
-
-    <!-- Besoin du jour -->
-    <div style="background:linear-gradient(135deg,var(--green-deep),var(--green-mid));border-radius:var(--radius);padding:16px;margin-bottom:12px;color:white;">
-      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;opacity:0.7;margin-bottom:8px;">💧 Besoin estimé aujourd'hui</div>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
-        <div style="font-family:var(--ff-serif);font-size:2.5rem;font-weight:300;">${w.liters}<span style="font-size:1rem;opacity:0.6;">L</span></div>
-        <div style="flex:1;">
-          <div style="font-size:0.85rem;font-weight:600;margin-bottom:2px;">${w.summary}</div>
-          <div style="font-size:0.75rem;opacity:0.7;">ET₀ ${w.et0}mm · Kc ${w.avgKc} · Sol ${Math.round(w.avgMoisture)}%</div>
-        </div>
-      </div>
-      ${w.factors.slice(0,3).map(f=>`
-        <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;opacity:0.9;margin-bottom:3px;">
-          <span>${f.icon}</span><span style="flex:1;">${f.label}</span>
-          <span style="font-weight:700;">${f.effect}</span>
-        </div>`).join('')}
-    </div>
-
-    <!-- Humidité par plante -->
-    ${state.selectedPlants.length ? `<div style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🪴 Humidité par plante</div>
-      ${plantBars}
-    </div>` : ''}
-
-    <!-- Précipitations 7j -->
-    <div style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🌧️ Précipitations — 7 jours</div>
-      <div style="display:flex;align-items:flex-end;gap:4px;height:65px;">
-        ${precip7.map((v,i)=>{
-          const pct=Math.max(v>0?8:0,(v/maxP)*100);
-          const lbl=i===6?'Auj.':i===5?'Hier':'J-'+(6-i);
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
-            ${v>0?`<div style="font-size:0.42rem;color:var(--water);margin-bottom:1px;">${v.toFixed(1)}</div>`:''}
-            <div style="width:100%;border-radius:2px 2px 0 0;background:${v>0?'var(--water)':'rgba(0,0,0,0.05)'};height:${pct}%;min-height:3px;"></div>
-            <div style="font-size:0.48rem;color:var(--text-light);margin-top:2px;">${lbl}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- Bilan financier -->
-    <div style="background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">💰 Bilan eau & optimisation</div>
-      <div style="display:flex;flex-direction:column;gap:0;">
-        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--green-mist);">
-          <span style="font-size:0.87rem;color:var(--text-dark);">💧 Volume total arrosé</span>
-          <span style="font-size:0.87rem;font-weight:700;color:var(--water);">${totalL}L</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--green-mist);">
-          <span style="font-size:0.87rem;color:var(--text-dark);">💶 Coût total eau</span>
-          <span style="font-size:0.87rem;font-weight:700;">${cost.toFixed(2)}€</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--green-mist);">
-          <span style="font-size:0.87rem;color:var(--text-dark);">⚠️ Sur-arrosage cumulé</span>
-          <span style="font-size:0.87rem;font-weight:700;color:var(--warn);">+${surplus}L (${surplusCost.toFixed(2)}€)</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:9px 0;">
-          <span style="font-size:0.87rem;color:var(--text-dark);">✅ Économie vs arrosage non guidé</span>
-          <span style="font-size:0.87rem;font-weight:700;color:var(--ok);">${saving.toFixed(2)}€</span>
-        </div>
-      </div>
-      <div style="margin-top:12px;padding:10px 12px;background:var(--green-mist);border-radius:10px;font-size:0.79rem;color:var(--text-mid);line-height:1.6;">
-        💡 <strong>Méthode :</strong> Le volume idéal est calculé par ET₀ Hargreaves-Samani × Kc de vos plantes × surface, ajusté par la pluie réelle, la pluie prévue J+1, la température et le vent. L'écart entre votre arrosage et ce volume idéal est mesuré à chaque session.
-      </div>
-    </div>
-
-  </div>`;
 }
 
 // ── COMMUNAUTÉ ────────────────────────────────────────────────────────────────
@@ -3677,12 +3286,37 @@ function renderMemoryTab() {
   const levelIdx = GARDEN_LEVELS.indexOf(level);
   const progress = Math.round(((pts - level.min) / (level.max - level.min)) * 100);
   const sid = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  sid('garden-level-num', levelIdx + 1);
+  sid('garden-level-num', 'Niv. ' + (levelIdx + 1));
   sid('garden-level-name', level.name);
-  sid('garden-level-sub', `${Math.round(progress)}% vers "${GARDEN_LEVELS[Math.min(levelIdx+1,4)].name}"`);
-  sid('garden-level-pts', `${pts} / ${level.max} points`);
+  const nextLvl = GARDEN_LEVELS[Math.min(levelIdx+1,4)];
+  sid('garden-level-sub', levelIdx < 4
+    ? `${pts - level.min} / ${level.max - level.min} pts vers "${nextLvl.name}"`
+    : `🏆 Niveau maximum atteint !`);
+  sid('garden-level-pts', `${pts} points au total`);
   const bar = document.getElementById('garden-level-bar');
-  if (bar) bar.style.width = progress + '%';
+  if (bar) bar.style.width = Math.min(100, progress) + '%';
+
+  // Update level emoji visual (large icon in the orb)
+  const orbEmoji = document.getElementById('level-orb-emoji');
+  if(orbEmoji) orbEmoji.textContent = level.emoji;
+
+  // Reward info card
+  const rewardInfo = document.getElementById('level-reward-info');
+  if(rewardInfo) {
+    const bonusSlots = state.bonusPlantSlots || 0;
+    if(levelIdx < 4 && nextLvl.reward) {
+      const ptsLeft = level.max - pts;
+      rewardInfo.innerHTML = `<div style="background:linear-gradient(135deg,#fef9e7,#fde9a0);border-radius:10px;padding:11px 13px;margin-top:10px;border:1px solid #f0c840;">
+        <div style="font-size:0.74rem;font-weight:700;color:#8b5e08;margin-bottom:3px;">🎁 Récompense au niveau ${levelIdx+2}</div>
+        <div style="font-size:0.82rem;color:#8b5e08;font-weight:600;">${nextLvl.reward.msg}</div>
+        <div style="font-size:0.76rem;color:#a07020;margin-top:3px;">Plus que <strong>${ptsLeft} pts</strong> à gagner !</div>
+      </div>`;
+    } else if(bonusSlots > 0) {
+      rewardInfo.innerHTML = `<div style="background:var(--green-mist);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:0.8rem;color:var(--green-deep);">✅ Plantes bonus gagnées : <strong>+${bonusSlots}</strong></div>`;
+    } else {
+      rewardInfo.innerHTML = '';
+    }
+  }
 
   // Streak
   const streak = state.weeklyStreak || 0;
@@ -3864,8 +3498,7 @@ function renderAccountInHeader() {
   // Inject FAB for journal
   const fab = document.createElement('button');
   fab.className = 'fab'; fab.id = 'journal-fab';
-  fab.innerHTML = '✏️ Nouvelle entrée';
-  fab.title = 'Nouvelle entrée';
+  fab.innerHTML = '<span style="font-size:1.15rem;">✏️</span><span>Nouvelle entrée</span>'; fab.title = 'Nouvelle entrée';
   fab.style.display = 'none';
   fab.onclick = () => openEntrySheet();
   document.body.appendChild(fab);
